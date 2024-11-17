@@ -122,6 +122,8 @@ class Clicker:
 
     def save_file(self):
         """Export save data to file."""
+        # TODO periodic save
+        # TODO save history
         # Get save data.
         save_data = self.driver.execute_script('return Game.WriteSave(1);')
 
