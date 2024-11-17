@@ -4,7 +4,7 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium.common.exceptions import StaleElementReferenceException
 import time
 
-URL = "https://orteil.dashnet.org/experiments/cookie/"
+URL = "https://orteil.dashnet.org/cookieclicker/"
 PURCHASE_INTERVAL_SEC = 5  # Interval to purchase upgrades in seconds
 PURCHASE_MULTIPLE = False  # Purchase multiple items every purchase interval
 GAME_RUN_MIN = 5  # Game run time in minutes
@@ -98,38 +98,48 @@ chrome_options.add_experimental_option("detach", True)
 driver = webdriver.Chrome(options=chrome_options)
 driver.get(URL)
 
-# Set the game end time.
-game_end: float = time.time() + GAME_RUN_MIN * 60
+# # Set the game end time.
+# game_end: float = time.time() + GAME_RUN_MIN * 60
+#
+# # Set the next purchase interval.
+# purchase_time: float = time.time() + PURCHASE_INTERVAL_SEC
+#
+# # Continue to run game until game end time.
+# current_time: float = time.time()
+# while current_time < game_end:
+#     # Purchase interval has been reached.
+#     if current_time >= purchase_time:
+#         # Purchase items.
+#         purchase_upgrades()
+#
+#         print("")
+#
+#         # Set next purchase interval.
+#         purchase_time = current_time + PURCHASE_INTERVAL_SEC
+#
+#         # Display remaining game time.
+#         minutes_remaining: int = round((game_end - current_time) // 60)
+#         seconds_remaining: int = round((game_end - current_time) % 60)
+#         print(f"Game time remaining: {minutes_remaining} minutes, {seconds_remaining} seconds\n")
+#
+#     # Click cookie every loop.
+#     driver.find_element(By.ID, "cookie").click()
+#
+#     # Update current time.
+#     current_time = time.time()
+#
+# # Display end score.
+# print(f"Final score after {GAME_RUN_MIN} minutes: {driver.find_element(By.ID, "cps").text}")
 
-# Set the next purchase interval.
-purchase_time: float = time.time() + PURCHASE_INTERVAL_SEC
+menu_input: str = ""
+while menu_input != "q":
+    print("Menu: ")
+    print("c = Enable / disable clicking")
+    print("p = Purchase upgrade")
+    print("q = Quit")
+    menu_input = input("Enter your selection: ")
 
-# Continue to run game until game end time.
-current_time: float = time.time()
-while current_time < game_end:
-    # Purchase interval has been reached.
-    if current_time >= purchase_time:
-        # Purchase items.
-        purchase_upgrades()
-
-        print("")
-
-        # Set next purchase interval.
-        purchase_time = current_time + PURCHASE_INTERVAL_SEC
-
-        # Display remaining game time.
-        minutes_remaining: int = round((game_end - current_time) // 60)
-        seconds_remaining: int = round((game_end - current_time) % 60)
-        print(f"Game time remaining: {minutes_remaining} minutes, {seconds_remaining} seconds\n")
-
-    # Click cookie every loop.
-    driver.find_element(By.ID, "cookie").click()
-
-    # Update current time.
-    current_time = time.time()
-
-# Display end score.
-print(f"Final score after {GAME_RUN_MIN} minutes: {driver.find_element(By.ID, "cps").text}")
+    print()
 
 # Quit browser.
 driver.quit()
