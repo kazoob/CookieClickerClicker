@@ -5,6 +5,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import NoSuchElementException
 from selenium.common.exceptions import StaleElementReferenceException
 from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import ElementClickInterceptedException
 from threading import Thread
 import time
 
@@ -45,6 +46,8 @@ class Clicker:
         except NoSuchElementException:
             pass
         except StaleElementReferenceException:
+            pass
+        except ElementClickInterceptedException:
             pass
         else:
             # Brief sleep to allow cookie policy selection.
@@ -106,11 +109,15 @@ class Clicker:
                     golden_cookie.click()
                 except StaleElementReferenceException:
                     pass
+                except ElementClickInterceptedException:
+                    pass
 
             # Click the big cookie.
             try:
                 self.cookie_element.click()
             except StaleElementReferenceException:
+                pass
+            except ElementClickInterceptedException:
                 pass
 
     def save_file(self):
