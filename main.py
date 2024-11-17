@@ -8,7 +8,7 @@ menu_input: str = ""
 # Display menu.
 while menu_input != "q":
     print("Menu: ")
-    print("c = Enable / disable clicking")
+    print("c = Toggle clicking")
     print("p = Purchase upgrade")
     print("s = Save game to file")
     print("q = Quit")
