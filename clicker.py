@@ -6,6 +6,7 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium.common.exceptions import StaleElementReferenceException
 from selenium.common.exceptions import TimeoutException
 from selenium.common.exceptions import ElementClickInterceptedException
+from selenium.common.exceptions import ElementNotInteractableException
 from threading import Thread
 import time
 
@@ -39,6 +40,8 @@ class Clicker:
                 pass
             except ElementClickInterceptedException:
                 pass
+            except ElementNotInteractableException:
+                pass
             else:
                 # Brief sleep to allow language selection.
                 time.sleep(1)
@@ -52,6 +55,8 @@ class Clicker:
         except StaleElementReferenceException:
             pass
         except ElementClickInterceptedException:
+            pass
+        except ElementNotInteractableException:
             pass
         else:
             # Brief sleep to allow cookie policy selection.
@@ -115,6 +120,8 @@ class Clicker:
                     pass
                 except ElementClickInterceptedException:
                     pass
+                except ElementNotInteractableException:
+                    pass
 
             # Click the big cookie.
             try:
@@ -122,6 +129,8 @@ class Clicker:
             except StaleElementReferenceException:
                 pass
             except ElementClickInterceptedException:
+                pass
+            except ElementNotInteractableException:
                 pass
 
     def save_file(self):
