@@ -13,6 +13,7 @@ SAVE_DATA_FILENAME = "save_data.txt"
 
 
 class Clicker:
+    """Open game in browser. Set up game. Import save data (if found). Start clicking if save data imported."""
     def __init__(self):
         # Set up browser driver.
         chrome_options = webdriver.ChromeOptions()
@@ -20,23 +21,24 @@ class Clicker:
         self.driver = webdriver.Chrome(options=chrome_options)
         self.driver.get(URL)
 
-        # Wait for the language selection menu
+        # Wait for the language selection menu.
         try:
             element_present = EC.presence_of_element_located((By.ID, "langSelect-EN"))
             WebDriverWait(self.driver, 5).until(element_present)
         except TimeoutException:
             print("Timed out waiting for page to load")
         else:
-            # Select language
+            # Select language.
             try:
                 lang_element = self.driver.find_element(By.ID, value="langSelect-EN")
                 lang_element.click()
             except NoSuchElementException:
                 pass
             else:
+                # Brief sleep to allow language selection.
                 time.sleep(1)
 
-        # Click the cookie policy prompt
+        # Click the cookie policy prompt.
         try:
             cookie_policy_element = self.driver.find_element(By.LINK_TEXT, value="Got it!")
             cookie_policy_element.click()
@@ -45,55 +47,68 @@ class Clicker:
         except StaleElementReferenceException:
             pass
         else:
+            # Brief sleep to allow cookie policy selection.
             time.sleep(1)
 
-        # Load existing save if present
+        # Load existing save if present.
         save_data_result = False
         try:
-            # Load save data from file
+            # Load save data from file.
             with open(SAVE_DATA_FILENAME) as save_file:
                 save_data = save_file.read()
         except FileNotFoundError:
             print("Save data not found")
         else:
-            # Load save data into game
+            # Load save data into game.
             save_data_result = self.driver.execute_script(f'return Game.ImportSaveCode("{save_data.strip()}");')
+
+            # Brief sleep to allow save data load.
             time.sleep(1)
 
-        # Disable save prompt
+        # Disable save prompt.
         self.driver.execute_script('Game.prefs.showBackupWarning = 0; Game.CloseNote(1);')
         time.sleep(1)
 
-        # Do not click cookie by default
+        # Do not click cookie by default.
         self.cookie_element = None
         self.clicking = False
 
-        # If save data loaded successfully, start clicking
+        # If save data loaded successfully, start clicking.
         if save_data_result:
             self.toggle_clicking()
 
     def toggle_clicking(self):
+        """Start / stop cookie clicking."""
+        # Invert cookie clicking status.
         self.clicking = not self.clicking
 
+        # Start cookie clicking.
         if self.clicking:
+            # Get big cookie element.
             self.cookie_element = self.driver.find_element(By.ID, value="bigCookie")
+
+            # Start cookie clicking thread.
             thread = Thread(target=self.click)
             thread.start()
 
     def click(self):
+        """Repeatedly click the big cookie."""
+        # Click the big cookie until requested to stop.
         while self.clicking:
-            # Check for a golden cookie
+            # Check for a golden cookie.
             try:
                 golden_cookie = self.driver.find_element(By.CLASS_NAME, value="shimmer")
             except NoSuchElementException:
                 pass
             else:
+                # Click the golden cookie.
                 golden_cookie.click()
 
-            # Click the big cookie
+            # Click the big cookie.
             self.cookie_element.click()
 
     def save_file(self):
+        """Export save data to file."""
         # Get save data.
         save_data = self.driver.execute_script('return Game.WriteSave(1);')
 
@@ -103,11 +118,12 @@ class Clicker:
                 save_file.write(save_data)
 
     def quit(self):
-        # Stop clicking
+        """Save the game data to file. Quit the game."""
+        # Stop clicking.
         if self.clicking:
             self.clicking = False
 
-        # Save game data to file
+        # Save game data to file.
         self.save_file()
 
         # Quit browser.

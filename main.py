@@ -1,9 +1,11 @@
 from clicker import Clicker
-import time
 
+# Create clicker class.
 clicker = Clicker()
 
 menu_input: str = ""
+
+# Display menu.
 while menu_input != "q":
     print("Menu: ")
     print("c = Enable / disable clicking")
@@ -12,13 +14,14 @@ while menu_input != "q":
     print("q = Quit")
     print()
     menu_input = input("Enter your selection: ").lower()
+    print()
 
+    # Start / stop clicking.
     if menu_input == "c":
         clicker.toggle_clicking()
+    # Save game data to file.
     elif menu_input == "s":
         clicker.save_file()
 
-    print()
-
-# Quit browser.
+# Quit clicker.
 clicker.quit()
