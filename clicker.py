@@ -1,24 +1,82 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import NoSuchElementException
 from selenium.common.exceptions import StaleElementReferenceException
+from selenium.common.exceptions import TimeoutException
+from threading import Thread
 
 URL = "https://orteil.dashnet.org/cookieclicker/"
+SAVE_DATA_FILENAME = "save_data.txt"
 
 
 class Clicker:
     def __init__(self):
         # Set up browser driver.
         chrome_options = webdriver.ChromeOptions()
-        chrome_options.add_experimental_option("detach", True)
+        chrome_options.add_experimental_option(name="detach", value=True)
         self.driver = webdriver.Chrome(options=chrome_options)
         self.driver.get(URL)
 
+        # Wait for the language selection menu
+        try:
+            element_present = EC.presence_of_element_located((By.ID, "langSelect-EN"))
+            WebDriverWait(self.driver, 5).until(element_present)
+        except TimeoutException:
+            print("Timed out waiting for page to load")
+
+        # Select language
+        try:
+            lang_element = self.driver.find_element(By.ID, value="langSelect-EN")
+            lang_element.click()
+        except NoSuchElementException:
+            print("No lang")
+
+        # Load existing save if present
+        try:
+            with open(SAVE_DATA_FILENAME) as save_file:
+                save_data = save_file.read()
+            print(save_data)
+        except FileNotFoundError:
+            print("Save data not found")
+        else:
+            # self.driver.execute_script('Game.ImportSave()')
+            # Game.ImportSaveCode()
+            self.driver.execute_script(f'Game.ImportSaveCode("{save_data.strip()}")')
+
+        # Do not start clicking
+        self.clicking = False
+        self.cookie_element = None
+
+    def toggle_clicking(self):
+        self.clicking = not self.clicking
+
+        if self.clicking:
+            self.cookie_element = self.driver.find_element(By.ID, value="bigCookie")
+            thread = Thread(target=self.click)
+            thread.start()
+
+    def click(self):
+        while self.clicking:
+            self.cookie_element.click()
+
+    def save_file(self):
+        # Get save data.
+        self.driver.execute_script('Game.ExportSave()')
+        save_data_element = self.driver.find_element(By.ID, value="textareaPrompt")
+        save_data = save_data_element.text
+
+        # Export save data to text file.
+        with open(file=SAVE_DATA_FILENAME, mode="w") as save_file:
+            save_file.write(save_data)
+
     def quit(self):
+        # Save game data to file
+        self.save_file()
+
+        # Quit browser.
         self.driver.quit()
-
-
-
 
 # PURCHASE_INTERVAL_SEC = 5  # Interval to purchase upgrades in seconds
 # PURCHASE_MULTIPLE = False  # Purchase multiple items every purchase interval
