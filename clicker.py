@@ -101,11 +101,17 @@ class Clicker:
             except NoSuchElementException:
                 pass
             else:
-                # Click the golden cookie.
-                golden_cookie.click()
+                try:
+                    # Click the golden cookie.
+                    golden_cookie.click()
+                except StaleElementReferenceException:
+                    pass
 
             # Click the big cookie.
-            self.cookie_element.click()
+            try:
+                self.cookie_element.click()
+            except StaleElementReferenceException:
+                pass
 
     def save_file(self):
         """Export save data to file."""
