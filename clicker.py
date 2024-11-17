@@ -25,13 +25,13 @@ class Clicker:
             WebDriverWait(self.driver, 5).until(element_present)
         except TimeoutException:
             print("Timed out waiting for page to load")
-
-        # Select language
-        try:
-            lang_element = self.driver.find_element(By.ID, value="langSelect-EN")
-            lang_element.click()
-        except NoSuchElementException:
-            print("No lang")
+        else:
+            # Select language
+            try:
+                lang_element = self.driver.find_element(By.ID, value="langSelect-EN")
+                lang_element.click()
+            except NoSuchElementException:
+                print("No lang")
 
         # Load existing save if present
         try:
