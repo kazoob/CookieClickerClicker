@@ -27,13 +27,17 @@ class Clicker:
             element_present = EC.presence_of_element_located((By.ID, "langSelect-EN"))
             WebDriverWait(self.driver, 5).until(element_present)
         except TimeoutException:
-            print("Timed out waiting for page to load")
+            print("Timed out waiting for language selection menu")
         else:
             # Select language.
             try:
                 lang_element = self.driver.find_element(By.ID, value="langSelect-EN")
                 lang_element.click()
             except NoSuchElementException:
+                pass
+            except StaleElementReferenceException:
+                pass
+            except ElementClickInterceptedException:
                 pass
             else:
                 # Brief sleep to allow language selection.
@@ -60,7 +64,7 @@ class Clicker:
             with open(SAVE_DATA_FILENAME) as save_file:
                 save_data = save_file.read()
         except FileNotFoundError:
-            print("Save data not found")
+            print(f"Save data not found: {SAVE_DATA_FILENAME}")
         else:
             # Load save data into game.
             save_data_result = self.driver.execute_script(f'return Game.ImportSaveCode("{save_data.strip()}");')
