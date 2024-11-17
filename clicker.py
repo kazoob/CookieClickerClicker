@@ -32,15 +32,20 @@ class Clicker:
                 lang_element = self.driver.find_element(By.ID, value="langSelect-EN")
                 lang_element.click()
             except NoSuchElementException:
-                print("No lang")
+                pass
+            else:
+                time.sleep(1)
 
         # Click the cookie policy prompt
         try:
             cookie_policy_element = self.driver.find_element(By.LINK_TEXT, value="Got it!")
+            cookie_policy_element.click()
         except NoSuchElementException:
             pass
+        except StaleElementReferenceException:
+            pass
         else:
-            cookie_policy_element.click()
+            time.sleep(1)
 
         # Load existing save if present
         save_data_result = False
@@ -52,14 +57,19 @@ class Clicker:
             print("Save data not found")
         else:
             # Load save data into game
-            save_data_result = self.driver.execute_script(f'return Game.ImportSaveCode("{save_data.strip()}")')
+            save_data_result = self.driver.execute_script(f'return Game.ImportSaveCode("{save_data.strip()}");')
+            time.sleep(1)
 
+        # Disable save prompt
+        self.driver.execute_script('Game.prefs.showBackupWarning = 0; Game.CloseNote(1);')
+        time.sleep(1)
+
+        # Do not click cookie by default
         self.cookie_element = None
         self.clicking = False
 
         # If save data loaded successfully, start clicking
         if save_data_result:
-            time.sleep(2)
             self.toggle_clicking()
 
     def toggle_clicking(self):
@@ -85,13 +95,12 @@ class Clicker:
 
     def save_file(self):
         # Get save data.
-        self.driver.execute_script('Game.ExportSave()')
-        save_data_element = self.driver.find_element(By.ID, value="textareaPrompt")
-        save_data = save_data_element.text
+        save_data = self.driver.execute_script('return Game.WriteSave(1);')
 
-        # Export save data to text file.
-        with open(file=SAVE_DATA_FILENAME, mode="w") as save_file:
-            save_file.write(save_data)
+        if save_data:
+            # Export save data to text file.
+            with open(file=SAVE_DATA_FILENAME, mode="w") as save_file:
+                save_file.write(save_data)
 
     def quit(self):
         # Stop clicking
