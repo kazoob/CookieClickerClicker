@@ -34,21 +34,33 @@ class Clicker:
             except NoSuchElementException:
                 print("No lang")
 
-        # Load existing save if present
+        # Click the cookie policy prompt
         try:
+            cookie_policy_element = self.driver.find_element(By.LINK_TEXT, value="Got it!")
+        except NoSuchElementException:
+            pass
+        else:
+            cookie_policy_element.click()
+
+        # Load existing save if present
+        save_data_result = False
+        try:
+            # Load save data from file
             with open(SAVE_DATA_FILENAME) as save_file:
                 save_data = save_file.read()
-            print(save_data)
         except FileNotFoundError:
             print("Save data not found")
         else:
-            # self.driver.execute_script('Game.ImportSave()')
-            # Game.ImportSaveCode()
-            self.driver.execute_script(f'Game.ImportSaveCode("{save_data.strip()}")')
+            # Load save data into game
+            save_data_result = self.driver.execute_script(f'return Game.ImportSaveCode("{save_data.strip()}")')
 
-        # Do not start clicking
-        self.clicking = False
         self.cookie_element = None
+        self.clicking = False
+
+        # If save data loaded successfully, start clicking
+        if save_data_result:
+            time.sleep(2)
+            self.toggle_clicking()
 
     def toggle_clicking(self):
         self.clicking = not self.clicking
