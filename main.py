@@ -10,6 +10,7 @@ while menu_input != "q":
     print("p = Purchase upgrade")
     print("s = Save game to file")
     print("q = Quit")
+    print()
     menu_input = input("Enter your selection: ").lower()
 
     if menu_input == "c":
