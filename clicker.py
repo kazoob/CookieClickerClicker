@@ -6,6 +6,7 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium.common.exceptions import StaleElementReferenceException
 from selenium.common.exceptions import TimeoutException
 from threading import Thread
+import time
 
 URL = "https://orteil.dashnet.org/cookieclicker/"
 SAVE_DATA_FILENAME = "save_data.txt"
@@ -59,6 +60,15 @@ class Clicker:
 
     def click(self):
         while self.clicking:
+            # Check for a golden cookie
+            try:
+                golden_cookie = self.driver.find_element(By.CLASS_NAME, value="shimmer")
+            except NoSuchElementException:
+                pass
+            else:
+                golden_cookie.click()
+
+            # Click the big cookie
             self.cookie_element.click()
 
     def save_file(self):
@@ -72,6 +82,10 @@ class Clicker:
             save_file.write(save_data)
 
     def quit(self):
+        # Stop clicking
+        if self.clicking:
+            self.clicking = False
+
         # Save game data to file
         self.save_file()
 
