@@ -9,7 +9,7 @@ menu_input: str = ""
 while menu_input != "q":
     print("Menu: ")
     print("c = Toggle clicking")
-    print("p = Purchase upgrade")
+    print("p = Purchase best building")
     print("s = Save game to file")
     print("q = Quit")
     print()
@@ -22,6 +22,8 @@ while menu_input != "q":
     # Save game data to file.
     elif menu_input == "s":
         clicker.save_file()
+    elif menu_input == "p":
+        clicker.purchase_best_building()
 
 # Quit clicker.
 clicker.quit()

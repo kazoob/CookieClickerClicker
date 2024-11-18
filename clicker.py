@@ -16,6 +16,7 @@ SAVE_DATA_FILENAME = "save_data.txt"
 
 class Clicker:
     """Open game in browser. Set up game. Import save data (if found). Start clicking if save data imported."""
+
     def __init__(self):
         # Set up browser driver.
         chrome_options = webdriver.ChromeOptions()
@@ -115,6 +116,7 @@ class Clicker:
             else:
                 try:
                     # Click the golden cookie.
+                    # Alternative https://www.reddit.com/r/CookieClicker/comments/6ntgjf/autoclick_golden_cookie_code_confirmed_to_work/
                     golden_cookie.click()
                 except StaleElementReferenceException:
                     pass
@@ -124,14 +126,23 @@ class Clicker:
                     pass
 
             # Click the big cookie.
-            try:
-                self.cookie_element.click()
-            except StaleElementReferenceException:
-                pass
-            except ElementClickInterceptedException:
-                pass
-            except ElementNotInteractableException:
-                pass
+            # try:
+            #     self.cookie_element.click()
+            # except StaleElementReferenceException:
+            #     pass
+            # except ElementClickInterceptedException:
+            #     pass
+            # except ElementNotInteractableException:
+            #     pass
+            self.driver.execute_script('Game.ClickCookie();')
+
+    def purchase_best_building(self):
+        try:
+            store_elements = self.driver.find_element(By.CLASS_NAME, value="products")
+        except NoSuchElementException:
+            pass
+        else:
+            pass
 
     def save_file(self):
         """Export save data to file."""
