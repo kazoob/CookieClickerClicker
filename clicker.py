@@ -160,7 +160,9 @@ class Clicker:
         # Continue until requested to stop.
         while self.clicking_event.is_set():
             # https://www.reddit.com/r/CookieClicker/comments/hl5e8i/shiny_wrinkler_and_a_javascript_code_for/
-            # Javascript to pop any spawned wrinklers. type == 0 to only pop non-shiny wrinklers.
+            # Javascript to pop any spawned wrinklers.
+            # type == 0 to only pop non-shiny wrinklers
+            # sucked > 0 to ensure wrinkler touches cookie and starts eating
             self.driver.execute_script(
                 'for (var i in Game.wrinklers)'
                 '{'
