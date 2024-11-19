@@ -7,8 +7,16 @@ menu_input: str = ""
 
 # Display menu.
 while menu_input != "q" and menu_input != "x":
+    # Display correct enable / disable clicking string
+    # Currently clicking
+    if clicker.get_clicking_status():
+        clicking_string = "Disable"
+    # Currently not clicking
+    else:
+        clicking_string = "Enable"
+
     print("Menu: ")
-    print("c = Toggle clicking")
+    print(f"c = {clicking_string} clicking")
     print("p = Purchase best building")
     print("s = Save game to file")
     print("q = Quit (save)")
