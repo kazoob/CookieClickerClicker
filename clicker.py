@@ -95,7 +95,6 @@ class Clicker:
         time.sleep(INTERACTION_DELAY)
 
         # Do not click cookie by default.
-        # self.cookie_element = None
         self.clicking_event = Event()
 
         # If save data loaded successfully, start clicking.
@@ -111,9 +110,6 @@ class Clicker:
         else:
             # Start cookie clicking.
             self.clicking_event.set()
-
-            # Get big cookie element.
-            # self.cookie_element = self.driver.find_element(By.ID, value="bigCookie")
 
             # Start cookie clicking thread.
             cookie_thread = Thread(target=self.cookie_click)
@@ -145,14 +141,6 @@ class Clicker:
                     pass
 
             # Click the big cookie.
-            # try:
-            #     self.cookie_element.click()
-            # except StaleElementReferenceException:
-            #     pass
-            # except ElementClickInterceptedException:
-            #     pass
-            # except ElementNotInteractableException:
-            #     pass
             self.driver.execute_script('Game.ClickCookie();')
 
     def wrinkler_pop(self):
