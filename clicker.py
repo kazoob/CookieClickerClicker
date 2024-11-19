@@ -9,10 +9,14 @@ from selenium.common.exceptions import ElementClickInterceptedException
 from selenium.common.exceptions import ElementNotInteractableException
 from threading import Thread, Event
 import time
+import os.path
+import glob
+from datetime import datetime
 
 URL = "https://orteil.dashnet.org/cookieclicker/"
 
 SAVE_DATA_FILENAME = "save_data.txt"
+SAVE_DATA_BACKUP_COUNT = 10
 
 INTERACTION_DELAY = 1
 ELEMENT_WAIT_DELAY = 5
@@ -182,11 +186,29 @@ class Clicker:
     def save_file(self):
         """Export save data to file."""
         # TODO periodic save
-        # TODO save history
         # Get save data.
         save_data = self.driver.execute_script('return Game.WriteSave(1);')
 
         if save_data:
+            # Check if existing save file is present.
+            if os.path.isfile(SAVE_DATA_FILENAME):
+                # Rename existing save file, append current date time.
+                timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+                backup_file_name = f"{SAVE_DATA_FILENAME.replace(".", f"_{timestamp}.")}"
+                os.rename(src=SAVE_DATA_FILENAME, dst=backup_file_name)
+
+            # Get list of backup save files, sorted oldest to newest.
+            save_backup_files = sorted(glob.glob(SAVE_DATA_FILENAME.replace(".", "_*.")))
+
+            # Check if backup save file count exceeds max count.
+            if len(save_backup_files) > SAVE_DATA_BACKUP_COUNT:
+                # Delete oldest files.
+                for i in range(0, len(save_backup_files) - SAVE_DATA_BACKUP_COUNT):
+                    try:
+                        os.remove(save_backup_files[i])
+                    except FileNotFoundError:
+                        print(f"Unable to delete old save file: {save_backup_files[i]}")
+
             # Export save data to text file.
             with open(file=SAVE_DATA_FILENAME, mode="w") as save_file:
                 save_file.write(save_data)
