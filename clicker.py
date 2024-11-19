@@ -171,6 +171,32 @@ class Clicker:
             # Throttle the next wrinkler check.
             time.sleep(WRINKLER_CHECK_FREQUENCY)
 
+    # TODO Note close?
+    # <div id="notes">
+    #   <div id="note-2" class="framed note haspic hasdesc">
+    #     <div class="close" onclick="PlaySound('snd/tick.mp3');Game.CloseNote(2);">x</div>
+    #     <div class="icon" style="background-position: -336px -528px"></div>
+    #     <div class="text">
+    #       <h3>Welcome back!</h3>
+    #       <div class="line"></div>
+    #       <h5>
+    #         You earned<b> 195, 849 cookies </b> while you were away.<br />
+    #         (2 hours at 15 %CpS, plus 7 hours, 20 minutes at 1.5 %.)
+    #       </h5>
+    #     </div>
+    #   </div>
+    #   <div id="note-3" class="framed note haspic hasdesc">
+    #     <div class="close" onclick="PlaySound('snd/tick.mp3');Game.CloseNote(3);">x</div>
+    #     <div class="icon" style="background-position: -1392px -672px"></div>
+    #     <div class="text">
+    #       <h3></h3>
+    #       <div class="line"></div>
+    #       <h5>You harvested <b> 1 sugar lump </b> while you were away.</h5>
+    #     </div>
+    #   </div>
+    #   <div class="framed close sidenote" onclick="PlaySound('snd/tick.mp3');Game.CloseNotes();">x</div>
+    # </div>
+
     def purchase_best_building(self):
         # TODO purchase best building
         try:
