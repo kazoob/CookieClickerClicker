@@ -119,8 +119,8 @@ class Clicker:
             cookie_thread = Thread(target=self.cookie_click)
             cookie_thread.start()
 
-            # Start wrinkler clicking thread.
-            wrinkler_thread = Thread(target=self.wrinkler_click)
+            # Start wrinkler popping thread.
+            wrinkler_thread = Thread(target=self.wrinkler_pop)
             wrinkler_thread.start()
 
     def cookie_click(self):
@@ -155,7 +155,7 @@ class Clicker:
             #     pass
             self.driver.execute_script('Game.ClickCookie();')
 
-    def wrinkler_click(self):
+    def wrinkler_pop(self):
         """Periodically check for any spawned wrinklers and pop them."""
         # Continue until requested to stop.
         while self.clicking_event.is_set():
