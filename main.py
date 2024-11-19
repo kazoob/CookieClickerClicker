@@ -14,6 +14,8 @@ while menu_input != "q" and menu_input != "x":
     print("q = Quit (save)")
     print("x = Quit (do not save)")
     print()
+
+    # Get user input.
     menu_input = input("Enter your selection: ").lower()
     print()
 
