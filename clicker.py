@@ -193,16 +193,15 @@ class Clicker:
             with open(file=SAVE_DATA_FILENAME, mode="w") as save_file:
                 save_file.write(save_data)
 
-    def quit(self):
+    def quit(self, save: bool = True):
         """Save the game data to file. Quit the game."""
-        # TODO option for quitting and not saving
         # Stop clicking threads.
         if self.clicking_event.is_set():
             self.clicking_event.clear()
-            time.sleep(WRINKLER_CHECK_FREQUENCY)
 
-        # Save game data to file.
-        self.save_file()
+        # Save game data to file if requested.
+        if save:
+            self.save_file()
 
         # Quit browser.
         self.driver.quit()
