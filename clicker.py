@@ -7,11 +7,16 @@ from selenium.common.exceptions import StaleElementReferenceException
 from selenium.common.exceptions import TimeoutException
 from selenium.common.exceptions import ElementClickInterceptedException
 from selenium.common.exceptions import ElementNotInteractableException
-from threading import Thread
+from threading import Thread, Event
 import time
 
 URL = "https://orteil.dashnet.org/cookieclicker/"
+
 SAVE_DATA_FILENAME = "save_data.txt"
+
+INTERACTION_DELAY = 1
+ELEMENT_WAIT_DELAY = 5
+WRINKLER_CHECK_FREQUENCY = 5
 
 
 class Clicker:
@@ -24,10 +29,33 @@ class Clicker:
         self.driver = webdriver.Chrome(options=chrome_options)
         self.driver.get(URL)
 
+        # Wait for the cookie policy prompt.
+        try:
+            element_present = EC.presence_of_element_located((By.LINK_TEXT, "Got it!"))
+            WebDriverWait(self.driver, ELEMENT_WAIT_DELAY).until(element_present)
+        except TimeoutException:
+            print("Timed out waiting for cookie policy prompt")
+        else:
+            # Click the cookie policy prompt.
+            try:
+                cookie_policy_element = self.driver.find_element(By.LINK_TEXT, value="Got it!")
+                cookie_policy_element.click()
+            except NoSuchElementException:
+                pass
+            except StaleElementReferenceException:
+                pass
+            except ElementClickInterceptedException:
+                pass
+            except ElementNotInteractableException:
+                pass
+            else:
+                # Brief sleep to allow cookie policy selection.
+                time.sleep(INTERACTION_DELAY)
+
         # Wait for the language selection menu.
         try:
             element_present = EC.presence_of_element_located((By.ID, "langSelect-EN"))
-            WebDriverWait(self.driver, 5).until(element_present)
+            WebDriverWait(self.driver, ELEMENT_WAIT_DELAY).until(element_present)
         except TimeoutException:
             print("Timed out waiting for language selection menu")
         else:
@@ -45,23 +73,7 @@ class Clicker:
                 pass
             else:
                 # Brief sleep to allow language selection.
-                time.sleep(1)
-
-        # Click the cookie policy prompt.
-        try:
-            cookie_policy_element = self.driver.find_element(By.LINK_TEXT, value="Got it!")
-            cookie_policy_element.click()
-        except NoSuchElementException:
-            pass
-        except StaleElementReferenceException:
-            pass
-        except ElementClickInterceptedException:
-            pass
-        except ElementNotInteractableException:
-            pass
-        else:
-            # Brief sleep to allow cookie policy selection.
-            time.sleep(1)
+                time.sleep(INTERACTION_DELAY)
 
         # Load existing save if present.
         save_data_result = False
@@ -76,15 +88,15 @@ class Clicker:
             save_data_result = self.driver.execute_script(f'return Game.ImportSaveCode("{save_data.strip()}");')
 
             # Brief sleep to allow save data load.
-            time.sleep(1)
+            time.sleep(INTERACTION_DELAY)
 
         # Disable save prompt.
         self.driver.execute_script('Game.prefs.showBackupWarning = 0; Game.CloseNote(1);')
-        time.sleep(1)
+        time.sleep(INTERACTION_DELAY)
 
         # Do not click cookie by default.
-        self.cookie_element = None
-        self.clicking = False
+        # self.cookie_element = None
+        self.clicking_event = Event()
 
         # If save data loaded successfully, start clicking.
         if save_data_result:
@@ -93,21 +105,28 @@ class Clicker:
     def toggle_clicking(self):
         """Start / stop cookie clicking."""
         # Invert cookie clicking status.
-        self.clicking = not self.clicking
+        if self.clicking_event.is_set():
+            # Stop cookie clicking.
+            self.clicking_event.clear()
+        else:
+            # Start cookie clicking.
+            self.clicking_event.set()
 
-        # Start cookie clicking.
-        if self.clicking:
             # Get big cookie element.
-            self.cookie_element = self.driver.find_element(By.ID, value="bigCookie")
+            # self.cookie_element = self.driver.find_element(By.ID, value="bigCookie")
 
             # Start cookie clicking thread.
-            thread = Thread(target=self.click)
-            thread.start()
+            cookie_thread = Thread(target=self.cookie_click)
+            cookie_thread.start()
 
-    def click(self):
+            # Start wrinkler clicking thread.
+            wrinkler_thread = Thread(target=self.wrinkler_click)
+            wrinkler_thread.start()
+
+    def cookie_click(self):
         """Repeatedly click the big cookie."""
-        # Click the big cookie until requested to stop.
-        while self.clicking:
+        # Continue until requested to stop.
+        while self.clicking_event.is_set():
             # Check for a golden cookie.
             try:
                 golden_cookie = self.driver.find_element(By.CLASS_NAME, value="shimmer")
@@ -136,6 +155,24 @@ class Clicker:
             #     pass
             self.driver.execute_script('Game.ClickCookie();')
 
+    def wrinkler_click(self):
+        """Periodically check for any spawned wrinklers and pop them."""
+        # Continue until requested to stop.
+        while self.clicking_event.is_set():
+            # https://www.reddit.com/r/CookieClicker/comments/hl5e8i/shiny_wrinkler_and_a_javascript_code_for/
+            # Javascript to pop any spawned wrinklers.
+            self.driver.execute_script(
+                'for (var i in Game.wrinklers)'
+                '{'
+                '   if (Game.wrinklers[i].type == 0 && Game.wrinklers[i].sucked > 0)'
+                '       {Game.wrinklers[i].hp = 0;'
+                '   }'
+                '}'
+            )
+
+            # Throttle the next wrinkler check.
+            time.sleep(WRINKLER_CHECK_FREQUENCY)
+
     def purchase_best_building(self):
         try:
             store_elements = self.driver.find_element(By.CLASS_NAME, value="products")
@@ -158,9 +195,11 @@ class Clicker:
 
     def quit(self):
         """Save the game data to file. Quit the game."""
-        # Stop clicking.
-        if self.clicking:
-            self.clicking = False
+        # TODO option for quitting and not saving
+        # Stop clicking threads.
+        if self.clicking_event.is_set():
+            self.clicking_event.clear()
+            time.sleep(WRINKLER_CHECK_FREQUENCY)
 
         # Save game data to file.
         self.save_file()
