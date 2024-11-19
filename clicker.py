@@ -123,7 +123,7 @@ class Clicker:
             wrinkler_thread = Thread(target=self.wrinkler_pop)
             wrinkler_thread.start()
 
-    def get_clicking_status(self):
+    def get_clicking_status(self) -> bool:
         return self.clicking_event.is_set()
 
     def cookie_click(self):
