@@ -165,6 +165,7 @@ class Clicker:
             time.sleep(WRINKLER_CHECK_FREQUENCY)
 
     def purchase_best_building(self):
+        # TODO purchase best building
         try:
             store_elements = self.driver.find_element(By.CLASS_NAME, value="products")
         except NoSuchElementException:
