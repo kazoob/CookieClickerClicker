@@ -173,6 +173,9 @@ class Clicker:
         else:
             pass
 
+    # TODO elder pledge
+    # TODO bingo research purchase
+
     def save_file(self):
         """Export save data to file."""
         # TODO periodic save
