@@ -131,7 +131,8 @@ class Clicker:
             else:
                 try:
                     # Click the golden cookie.
-                    # Alternative https://www.reddit.com/r/CookieClicker/comments/6ntgjf/autoclick_golden_cookie_code_confirmed_to_work/
+                    # TODO alternative Javascript
+                    #  https://www.reddit.com/r/CookieClicker/comments/6ntgjf/autoclick_golden_cookie_code_confirmed_to_work/
                     golden_cookie.click()
                 except StaleElementReferenceException:
                     pass
