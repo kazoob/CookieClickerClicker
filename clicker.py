@@ -180,23 +180,12 @@ class Clicker:
         """Repeatedly click the big cookie."""
         # Continue until requested to stop.
         while self.clicking_event.is_set():
-            # Check for a golden cookie.
-            try:
-                golden_cookie = self.driver.find_element(By.CLASS_NAME, value="shimmer")
-            except NoSuchElementException:
-                pass
-            else:
-                try:
-                    # Click the golden cookie.
-                    # TODO alternative Javascript
-                    #  https://www.reddit.com/r/CookieClicker/comments/6ntgjf/autoclick_golden_cookie_code_confirmed_to_work/
-                    golden_cookie.click()
-                except StaleElementReferenceException:
-                    pass
-                except ElementClickInterceptedException:
-                    pass
-                except ElementNotInteractableException:
-                    pass
+            # Get number of golden cookies.
+            golden_cookie_count = int(self.driver.execute_script('return Game.shimmers.length;'))
+
+            # Pop on any golden cookies found (including wrath, reindeer, etc.).
+            for i in range(0, golden_cookie_count):
+                self.driver.execute_script(f'Game.shimmers[{i}].pop();')
 
             # Click the big cookie.
             self.driver.execute_script('Game.ClickCookie();')
@@ -282,7 +271,8 @@ class Clicker:
                 # Get store item cps.
                 # Alternate cps formula from source code: (me.storedTotalCps / me.amount) * Game.globalCpsMult
                 store_item_cps = float(
-                    self.driver.execute_script(f'return Game.ObjectsById[{i}].storedCps;')) * global_cps_mult
+                    self.driver.execute_script(
+                        f'return Game.ObjectsById[{i}].storedCps;')) * bulk_quantity * global_cps_mult
 
                 # Proceed if store item is purchasable (have enough cookies in bank).
                 if cookies >= store_item_price:
@@ -388,7 +378,6 @@ class Clicker:
 
     # TODO elder pledge
     # TODO periodic save
-    # TODO don't click wraith cookie?
 
     def save_file(self):
         """Export save data to file."""
