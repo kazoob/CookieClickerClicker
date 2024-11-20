@@ -46,6 +46,7 @@ class Clicker:
         # Set up browser driver.
         chrome_options = webdriver.ChromeOptions()
         chrome_options.add_experimental_option(name="detach", value=True)
+        chrome_options.add_argument("--mute-audio")
         self.driver = webdriver.Chrome(options=chrome_options)
         self.driver.get(URL)
 
