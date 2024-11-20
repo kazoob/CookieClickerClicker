@@ -1,5 +1,23 @@
 from clicker import Clicker
 
+
+def get_count(text: str) -> int:
+    """Return the maximum purchase count entered by the user. If no count or an error, return 1."""
+    # See if user entered a purchase quantity.
+    if len(text.split(" ")) >= 2:
+        try:
+            # Get purchase quantity
+            cnt = int(text.split(" ")[1])
+        except ValueError:
+            # Invalid purchase quantity entered.
+            cnt = 1
+    # No purchase quantity entered.
+    else:
+        cnt = 1
+
+    return cnt
+
+
 # Create clicker class.
 clicker = Clicker()
 
@@ -19,6 +37,8 @@ while menu_input != "q" and menu_input != "x":
     print(f"c   = {clicking_string} clicking")
     print("p   = Purchase best building")
     print("p # = Purchase best # buildings")
+    print("u   = Purchase next upgrade")
+    print("u # = Purchase next # upgrades")
     print("s   = Save game to file")
     print("q   = Quit (save)")
     print("x   = Quit (do not save)")
@@ -36,20 +56,12 @@ while menu_input != "q" and menu_input != "x":
         clicker.save_file()
     # Purchase best building.
     elif menu_input.startswith("p"):
-        # See if user entered a purchase quantity.
-        if len(menu_input.split(" ")) >= 2:
-            try:
-                # Get purchase quantity
-                count = int(menu_input.split(" ")[1])
-            except ValueError:
-                # Invalid purchase quantity entered.
-                count = 1
-        # No purchase quantity entered.
-        else:
-            count = 1
-
         # Purchase requested number of buildings (maximum).
-        clicker.purchase(count)
+        clicker.purchase_building(get_count(menu_input))
+    # Purchase best upgrade.
+    elif menu_input.startswith("u"):
+        # Purchase requested number of upgrades (maximum).
+        clicker.purchase_upgrade(get_count(menu_input))
     # Quit and save data.
     elif menu_input.startswith("q"):
         clicker.quit(save=True)

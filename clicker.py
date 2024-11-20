@@ -7,6 +7,7 @@ from selenium.common.exceptions import StaleElementReferenceException
 from selenium.common.exceptions import TimeoutException
 from selenium.common.exceptions import ElementClickInterceptedException
 from selenium.common.exceptions import ElementNotInteractableException
+from selenium.common.exceptions import JavascriptException
 from threading import Thread, Event
 import time
 import os.path
@@ -18,6 +19,13 @@ URL = "https://orteil.dashnet.org/cookieclicker/"
 
 SAVE_DATA_FILENAME = "save_data.txt"
 SAVE_DATA_BACKUP_COUNT = 10
+
+UPGRADES_TO_PURCHASE = {
+    "",
+    "cookie",
+    "kitten",
+    "prestige",
+}
 
 INTERACTION_DELAY = 1
 ELEMENT_WAIT_DELAY = 5
@@ -198,7 +206,7 @@ class Clicker:
     #   <div class="framed close sidenote" onclick="PlaySound('snd/tick.mp3');Game.CloseNotes();">x</div>
     # </div>
 
-    def purchase(self, count: int = 1):
+    def purchase_building(self, count: int = 1):
         """Purchase most efficient affordable building, up to a maximum of 'count'. Default 1."""
         # Continue purchasing up to maximum requested buildings.
         while count > 0:
@@ -276,6 +284,69 @@ class Clicker:
             return True
 
         # Return False indicating no successful purchase.
+        return False
+
+    # TODO limit maximum number of upgrades?
+
+    def purchase_upgrade(self, count: int = 1):
+        """Purchase next allowed upgrade, up to a maximum of 'count'. Default 1."""
+        # Continue purchasing up to maximum requested upgrades.
+        while count > 0:
+            # If purchase was not successful (not enough cookies in bank), end while loop.
+            if not self.purchase_next_upgrade():
+                break
+
+            count -= 1
+
+        print()
+
+    def purchase_next_upgrade(self) -> bool:
+        """Purchase the next allowed upgrade. Return True if purchase was successful, otherwise False."""
+        # Get number of upgrades in store.
+        upgrade_count = int(self.driver.execute_script('return Game.UpgradesInStore.length;'))
+
+        # Get number of cookies in bank.
+        cookies = float(self.driver.execute_script(f'return Game.cookies;'))
+
+        try:
+            # Examine each upgrade.
+            for i in range(0, upgrade_count):
+                # Get updated number of upgrades in store every iteration.
+                upgrade_count_updated = int(self.driver.execute_script('return Game.UpgradesInStore.length;'))
+
+                # Confirm current upgrade index is still valid (sometimes store can update during
+                # for loop and can cause an error).
+                if i < upgrade_count_updated:
+                    # Determine if store item is available or locked.
+                    upgrade_unlocked = int(self.driver.execute_script(f'return Game.UpgradesInStore[{i}].unlocked;'))
+
+                    # Upgrade is available (not locked).
+                    if upgrade_unlocked == 1:
+                        # Get upgrade name.
+                        upgrade_name = self.driver.execute_script(f'return Game.UpgradesInStore[{i}].dname;')
+
+                        # Get upgrade price.
+                        upgrade_price = int(self.driver.execute_script(f'return Game.UpgradesInStore[{i}].basePrice;'))
+
+                        # Get upgrade purchase status.
+                        upgrade_bought = int(self.driver.execute_script(f'return Game.UpgradesInStore[{i}].bought;'))
+
+                        # Get upgrade type.
+                        upgrade_pool = self.driver.execute_script(f'return Game.UpgradesInStore[{i}].pool;')
+
+                        # Purchase upgrade if not bought, in list of upgrades to purchase and have enough cookies in the bank.
+                        if upgrade_bought == 0 and (upgrade_pool in UPGRADES_TO_PURCHASE) and cookies >= upgrade_price:
+                            # Purchase upgrade.
+                            self.driver.execute_script(f'return Game.UpgradesInStore[{i}].click();')
+                            print(f"Purchased '{upgrade_name}' for {upgrade_price} cookies, pool '{upgrade_pool}'")
+
+                            # Return True to indicate successful purchase.
+                            return True
+
+        except JavascriptException:
+            pass
+
+        # Return False to indicate no successful purchase.
         return False
 
     # TODO elder pledge
