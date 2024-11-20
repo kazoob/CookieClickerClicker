@@ -352,6 +352,7 @@ class Clicker:
     # TODO dragon cookie
     # TODO bingo research purchase
     # TODO periodic save
+    # TODO don't click wraith cookie?
 
     def save_file(self):
         """Export save data to file."""
