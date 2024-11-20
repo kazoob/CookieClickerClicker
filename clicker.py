@@ -185,7 +185,10 @@ class Clicker:
 
             # Pop on any golden cookies found (including wrath, reindeer, etc.).
             for i in range(0, golden_cookie_count):
-                self.driver.execute_script(f'Game.shimmers[{i}].pop();')
+                try:
+                    self.driver.execute_script(f'Game.shimmers[{i}].pop();')
+                except JavascriptException:
+                    pass
 
             # Click the big cookie.
             self.driver.execute_script('Game.ClickCookie();')
@@ -198,14 +201,17 @@ class Clicker:
             # Javascript to pop any spawned wrinklers.
             # type == 0 to only pop non-shiny wrinklers
             # sucked > 0 to ensure wrinkler touches cookie and starts eating
-            self.driver.execute_script(
-                'for (var i in Game.wrinklers)'
-                '{'
-                '   if (Game.wrinklers[i].type == 0 && Game.wrinklers[i].sucked > 0)'
-                '       {Game.wrinklers[i].hp = 0;'
-                '   }'
-                '}'
-            )
+            try:
+                self.driver.execute_script(
+                    'for (var i in Game.wrinklers)'
+                    '{'
+                    '   if (Game.wrinklers[i].type == 0 && Game.wrinklers[i].sucked > 0)'
+                    '       {Game.wrinklers[i].hp = 0;'
+                    '   }'
+                    '}'
+                )
+            except JavascriptException:
+                pass
 
             # Throttle the next wrinkler check.
             time.sleep(WRINKLER_CHECK_FREQUENCY)
