@@ -232,7 +232,7 @@ class Clicker:
         self.driver.execute_script(f'Game.storeBulkButton({BUILDINGS_PURCHASE_BULK_IDS[bulk_quantity]});')
 
         # Continue purchasing up to maximum requested buildings.
-        while count > 0:
+        while count // bulk_quantity > 0:
             # If purchase was not successful (not enough cookies in bank), end while loop.
             if not self._purchase_best_building(bulk_quantity):
                 break
