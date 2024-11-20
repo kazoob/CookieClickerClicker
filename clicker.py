@@ -12,6 +12,7 @@ import time
 import os.path
 import glob
 from datetime import datetime
+from operator import itemgetter
 
 URL = "https://orteil.dashnet.org/cookieclicker/"
 
@@ -197,14 +198,50 @@ class Clicker:
     #   <div class="framed close sidenote" onclick="PlaySound('snd/tick.mp3');Game.CloseNotes();">x</div>
     # </div>
 
-    def purchase_best_building(self):
+    def purchase_best_building(self) -> bool:
         # TODO purchase best building
-        try:
-            store_elements = self.driver.find_element(By.CLASS_NAME, value="products")
-        except NoSuchElementException:
-            pass
-        else:
-            pass
+        store = []
+        store_count = int(self.driver.execute_script('return Game.ObjectsById.length;'))
+
+        global_cps_mult = float(self.driver.execute_script(f'return Game.globalCpsMult;'))
+        cookies = float(self.driver.execute_script(f'return Game.cookies;'))
+
+        for i in range(0, store_count):
+            store_item_locked = int(self.driver.execute_script(f'return Game.ObjectsById[{i}].locked;'))
+
+            if store_item_locked == 0:
+                store_item_name = self.driver.execute_script(f'return Game.ObjectsById[{i}].dname;')
+                store_item_price = int(self.driver.execute_script(f'return Game.ObjectsById[{i}].price;'))
+                # Alternate CPS formula from source code: (me.storedTotalCps / me.amount) * Game.globalCpsMult
+                store_item_cps = float(
+                    self.driver.execute_script(f'return Game.ObjectsById[{i}].storedCps;')) * global_cps_mult
+
+                if cookies >= store_item_price:
+                    store_item_efficiency = (store_item_cps * global_cps_mult) / store_item_price
+                else:
+                    store_item_efficiency = -1
+
+                store.append(
+                    {
+                        "id": i,
+                        "name": store_item_name,
+                        "price": store_item_price,
+                        "cps": store_item_cps,
+                        "efficiency": store_item_efficiency,
+                    }
+                )
+
+        store = sorted(store, key=itemgetter('efficiency'), reverse=True)
+
+        if len(store) > 0:
+            self.driver.execute_script(f'Game.ClickProduct({store[0]["id"]});')
+            print(f"Purchased {store[0]["name"]} for {store[0]["price"]} cookies, "
+                  f"generating {round(store[0]["cps"], 1)} cps")
+            print()
+
+            return True
+
+        return False
 
     # TODO elder pledge
     # TODO bingo research purchase
@@ -244,6 +281,7 @@ class Clicker:
         # Stop clicking threads.
         if self.clicking_event.is_set():
             self.clicking_event.clear()
+            time.sleep(WRINKLER_CHECK_FREQUENCY)
 
         # Save game data to file if requested.
         if save:
