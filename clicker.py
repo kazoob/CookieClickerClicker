@@ -350,7 +350,7 @@ class Clicker:
                         upgrade_name = self.driver.execute_script(f'return Game.UpgradesInStore[{i}].dname;')
 
                         # Get upgrade id.
-                        upgrade_id = self.driver.execute_script(f'return Game.UpgradesInStore[{i}].id;')
+                        upgrade_id = int(self.driver.execute_script(f'return Game.UpgradesInStore[{i}].id;'))
 
                         # Get upgrade price.
                         upgrade_price = int(self.driver.execute_script(f'return Game.UpgradesInStore[{i}].basePrice;'))
