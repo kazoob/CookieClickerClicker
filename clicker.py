@@ -316,6 +316,8 @@ class Clicker:
         # Stop clicking threads.
         if self.clicking_event.is_set():
             self.clicking_event.clear()
+
+            # Wait for wrinkler thread to end.
             time.sleep(WRINKLER_CHECK_FREQUENCY)
 
         # Save game data to file if requested.
