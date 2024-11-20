@@ -20,18 +20,19 @@ URL = "https://orteil.dashnet.org/cookieclicker/"
 SAVE_DATA_FILENAME = "save_data.txt"
 SAVE_DATA_BACKUP_COUNT = 10
 
-BUILDINGS_PURCHASE_BULK_IDS = {
+BUILDINGS_BULK_IDS = {
     1: 2,
     10: 3,
     100: 4,
 }
 
-UPGRADES_PURCHASE_ALLOWED = [
-    "prestige",
-    "kitten",
-    "",
-    "cookie",
-]
+UPGRADES_ALLOWED = {
+    "prestige": -1,
+    "kitten": -1,
+    "tech": [65, 66, 67, 68, 70, 71, 72],
+    "": -1,
+    "cookie": -1,
+}
 
 INTERACTION_DELAY = 1
 ELEMENT_WAIT_DELAY = 5
@@ -229,7 +230,7 @@ class Clicker:
             bulk_quantity = 1
 
         # Set bulk purchasing mode.
-        self.driver.execute_script(f'Game.storeBulkButton({BUILDINGS_PURCHASE_BULK_IDS[bulk_quantity]});')
+        self.driver.execute_script(f'Game.storeBulkButton({BUILDINGS_BULK_IDS[bulk_quantity]});')
 
         # Continue purchasing up to maximum requested buildings.
         while count // bulk_quantity > 0:
@@ -240,7 +241,7 @@ class Clicker:
             count -= bulk_quantity
 
         # Restore bulk purchasing to 1.
-        self.driver.execute_script(f'Game.storeBulkButton({BUILDINGS_PURCHASE_BULK_IDS[1]});')
+        self.driver.execute_script(f'Game.storeBulkButton({BUILDINGS_BULK_IDS[1]});')
         print()
 
     def _purchase_best_building(self, bulk_quantity: int = 1) -> bool:
@@ -348,6 +349,9 @@ class Clicker:
                         # Get upgrade name.
                         upgrade_name = self.driver.execute_script(f'return Game.UpgradesInStore[{i}].dname;')
 
+                        # Get upgrade id.
+                        upgrade_id = self.driver.execute_script(f'return Game.UpgradesInStore[{i}].id;')
+
                         # Get upgrade price.
                         upgrade_price = int(self.driver.execute_script(f'return Game.UpgradesInStore[{i}].basePrice;'))
 
@@ -357,15 +361,16 @@ class Clicker:
                         # Get upgrade type.
                         upgrade_pool = self.driver.execute_script(f'return Game.UpgradesInStore[{i}].pool;')
 
-                        # Purchase upgrade if not bought, in list of upgrades to purchase and have enough cookies in the bank.
-                        if upgrade_bought == 0 and (
-                                upgrade_pool in UPGRADES_PURCHASE_ALLOWED) and cookies >= upgrade_price:
-                            # Purchase upgrade.
-                            self.driver.execute_script(f'return Game.UpgradesInStore[{i}].click();')
-                            print(f"Purchased '{upgrade_name}' for {upgrade_price} cookies, pool '{upgrade_pool}'")
+                        # Check if upgrade not bought, is in list of allowed upgrades and have enough cookies.
+                        if upgrade_bought == 0 and upgrade_pool in UPGRADES_ALLOWED and cookies >= upgrade_price:
+                            # Check if we can purchase any upgrade in pool or only certain ones.
+                            if UPGRADES_ALLOWED[upgrade_pool] == -1 or upgrade_id in UPGRADES_ALLOWED[upgrade_pool]:
+                                # Purchase upgrade.
+                                self.driver.execute_script(f'return Game.UpgradesInStore[{i}].click();')
+                                print(f"Purchased '{upgrade_name}' for {upgrade_price} cookies, pool '{upgrade_pool}'")
 
-                            # Return True to indicate successful purchase.
-                            return True
+                                # Return True to indicate successful purchase.
+                                return True
 
         except JavascriptException:
             pass
@@ -375,7 +380,6 @@ class Clicker:
 
     # TODO limit maximum number of upgrades?
     # TODO elder pledge
-    # TODO bingo research purchase
     # TODO periodic save
     # TODO don't click wraith cookie?
     # TODO number separators
