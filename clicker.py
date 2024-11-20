@@ -20,12 +20,18 @@ URL = "https://orteil.dashnet.org/cookieclicker/"
 SAVE_DATA_FILENAME = "save_data.txt"
 SAVE_DATA_BACKUP_COUNT = 10
 
-UPGRADES_TO_PURCHASE = {
+BUILDINGS_PURCHASE_BULK_IDS = {
+    1: 2,
+    10: 3,
+    100: 4,
+}
+
+UPGRADES_PURCHASE_ALLOWED = [
+    "prestige",
+    "kitten",
     "",
     "cookie",
-    "kitten",
-    "prestige",
-}
+]
 
 INTERACTION_DELAY = 1
 ELEMENT_WAIT_DELAY = 5
@@ -206,19 +212,38 @@ class Clicker:
     #   <div class="framed close sidenote" onclick="PlaySound('snd/tick.mp3');Game.CloseNotes();">x</div>
     # </div>
 
-    def purchase_building(self, count: int = 1):
+    def purchase_building(self, count: int = 1, bulk: bool = False):
         """Purchase most efficient affordable building, up to a maximum of 'count'. Default 1."""
+        # Determine bulk purchasing.
+        # No bulk purchasing.
+        if not bulk:
+            bulk_quantity = 1
+        # Purchase bulk in 100 quantities.
+        elif count // 100 > 0:
+            bulk_quantity = 100
+        # Purchase bulk in 10 quantities.
+        elif count // 10 > 0:
+            bulk_quantity = 10
+        # Purchase bulk in 1 quantity.
+        else:
+            bulk_quantity = 1
+
+        # Set bulk purchasing mode.
+        self.driver.execute_script(f'Game.storeBulkButton({BUILDINGS_PURCHASE_BULK_IDS[bulk_quantity]});')
+
         # Continue purchasing up to maximum requested buildings.
         while count > 0:
             # If purchase was not successful (not enough cookies in bank), end while loop.
-            if not self.purchase_best_building():
+            if not self.purchase_best_building(bulk_quantity):
                 break
 
-            count -= 1
+            count -= bulk_quantity
 
+        # Restore bulk purchasing to 1.
+        self.driver.execute_script(f'Game.storeBulkButton({BUILDINGS_PURCHASE_BULK_IDS[1]});')
         print()
 
-    def purchase_best_building(self) -> bool:
+    def purchase_best_building(self, bulk_quantity: int = 1) -> bool:
         """Purchase the most efficient affordable building. Return True if purchase was successful, otherwise False."""
         # Store list.
         store = []
@@ -243,7 +268,7 @@ class Clicker:
                 store_item_name = self.driver.execute_script(f'return Game.ObjectsById[{i}].dname;')
 
                 # Get store item price.
-                store_item_price = int(self.driver.execute_script(f'return Game.ObjectsById[{i}].price;'))
+                store_item_price = int(self.driver.execute_script(f'return Game.ObjectsById[{i}].bulkPrice;'))
 
                 # Get store item cps.
                 # Alternate cps formula from source code: (me.storedTotalCps / me.amount) * Game.globalCpsMult
@@ -277,7 +302,7 @@ class Clicker:
         if len(store) > 0:
             # Purchase most efficient store item.
             self.driver.execute_script(f'Game.ClickProduct({store[0]["id"]});')
-            print(f"Purchased {store[0]["name"]} for {store[0]["price"]} cookies, "
+            print(f"Purchased {bulk_quantity} x {store[0]["name"]} for {store[0]["price"]} cookies, "
                   f"generating {round(store[0]["cps"], 1)} cps")
 
             # Return True indicating successful purchase.
@@ -333,7 +358,8 @@ class Clicker:
                         upgrade_pool = self.driver.execute_script(f'return Game.UpgradesInStore[{i}].pool;')
 
                         # Purchase upgrade if not bought, in list of upgrades to purchase and have enough cookies in the bank.
-                        if upgrade_bought == 0 and (upgrade_pool in UPGRADES_TO_PURCHASE) and cookies >= upgrade_price:
+                        if upgrade_bought == 0 and (
+                                upgrade_pool in UPGRADES_PURCHASE_ALLOWED) and cookies >= upgrade_price:
                             # Purchase upgrade.
                             self.driver.execute_script(f'return Game.UpgradesInStore[{i}].click();')
                             print(f"Purchased '{upgrade_name}' for {upgrade_price} cookies, pool '{upgrade_pool}'")

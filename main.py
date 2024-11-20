@@ -34,14 +34,15 @@ while menu_input != "q" and menu_input != "x":
         clicking_string = "Enable"
 
     print("Menu: ")
-    print(f"c   = {clicking_string} clicking")
-    print("p   = Purchase best building")
-    print("p # = Purchase best # buildings")
-    print("u   = Purchase next upgrade")
-    print("u # = Purchase next # upgrades")
-    print("s   = Save game to file")
-    print("q   = Quit (save)")
-    print("x   = Quit (do not save)")
+    print(f"c     = {clicking_string} clicking")
+    print("p     = Purchase best building")
+    print("p #   = Purchase best # buildings (individually)")
+    print("p # b = Purchase best # buildings (bulk)")
+    print("u     = Purchase next upgrade")
+    print("u #   = Purchase next # upgrades")
+    print("s     = Save game to file")
+    print("q     = Quit (save)")
+    print("x     = Quit (do not save)")
     print()
 
     # Get user input.
@@ -56,8 +57,10 @@ while menu_input != "q" and menu_input != "x":
         clicker.save_file()
     # Purchase best building.
     elif menu_input.startswith("p"):
+        # Determine if bulk purchasing is requested.
+        bulk_purchase = menu_input.endswith("b")
         # Purchase requested number of buildings (maximum).
-        clicker.purchase_building(get_count(menu_input))
+        clicker.purchase_building(get_count(menu_input), bulk_purchase)
     # Purchase best upgrade.
     elif menu_input.startswith("u"):
         # Purchase requested number of upgrades (maximum).
