@@ -14,6 +14,7 @@ import os.path
 import glob
 from datetime import datetime
 from operator import itemgetter
+import math
 
 URL = "https://orteil.dashnet.org/cookieclicker/"
 
@@ -37,6 +38,31 @@ UPGRADES_ALLOWED = {
 INTERACTION_DELAY = 1
 ELEMENT_WAIT_DELAY = 5
 WRINKLER_CHECK_FREQUENCY = 5
+
+MILLNAMES = [
+    '',
+    ' Thousand',
+    ' Million',
+    ' Billion',
+    ' Trillion',
+    ' Quadrillion',
+    ' Quintillion',
+    ' Sextillion',
+    ' Septillion',
+    ' Octillion',
+    ' Nonillion',
+    ' Decillion',
+    ' Undecillion',
+    ' Duodecillion',
+    ' Tredecillion',
+    ' Quattuordecillion',
+    ' Quindecillion',
+    ' Sexdecillion',
+    ' Septendecillion',
+    ' Octodecillion',
+    ' Novemdecillion',
+    ' Vigintillion',
+]
 
 
 class Clicker:
@@ -121,6 +147,13 @@ class Clicker:
         # If save data loaded successfully, start clicking.
         if save_data_result:
             self.toggle_clicking()
+
+    def _millify(self, n: float) -> str:
+        """Convert large number to human friendly string."""
+        # From https://stackoverflow.com/a/3155023
+        millidx = max(0, min(len(MILLNAMES) - 1, int(math.floor(0 if n == 0 else math.log10(abs(n)) / 3))))
+
+        return '{:.3f}{}'.format(n / 10 ** (3 * millidx), MILLNAMES[millidx])
 
     def toggle_clicking(self):
         """Start / stop cookie clicking."""
@@ -278,8 +311,8 @@ class Clicker:
         if len(store) > 0:
             # Purchase most efficient store item.
             self.driver.execute_script(f'Game.ClickProduct({store[0]["id"]});')
-            print(f"Purchased {bulk_quantity} x {store[0]["name"]} for {store[0]["price"]} cookies, "
-                  f"generating {round(store[0]["cps"], 1)} cps")
+            print(f"Purchased {bulk_quantity} x {store[0]["name"]} for {self._millify(store[0]["price"])} cookies, "
+                  f"generating {self._millify(store[0]["cps"])} cps")
 
             # Return True indicating successful purchase.
             return True
@@ -342,7 +375,7 @@ class Clicker:
                             if UPGRADES_ALLOWED[upgrade_pool] == -1 or upgrade_id in UPGRADES_ALLOWED[upgrade_pool]:
                                 # Purchase upgrade.
                                 self.driver.execute_script(f'return Game.UpgradesInStore[{i}].click();')
-                                print(f"Purchased '{upgrade_name}' for {upgrade_price} cookies, pool '{upgrade_pool}'")
+                                print(f"Purchased '{upgrade_name}' for {self._millify(upgrade_price)} cookies")
 
                                 # Return True to indicate successful purchase.
                                 return True
@@ -353,11 +386,9 @@ class Clicker:
         # Return False to indicate no successful purchase.
         return False
 
-    # TODO limit maximum number of buildings?
     # TODO elder pledge
     # TODO periodic save
     # TODO don't click wraith cookie?
-    # TODO number separators
 
     def save_file(self):
         """Export save data to file."""
