@@ -355,6 +355,7 @@ class Clicker:
     # TODO number separators
     # TODO upgrades prioritize kittens
     # TODO purchase stop if can't purchase best building due to no cookies
+    # TODO bulk 10 100 purchase
 
     def save_file(self):
         """Export save data to file."""
