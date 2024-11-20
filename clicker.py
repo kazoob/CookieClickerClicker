@@ -349,7 +349,6 @@ class Clicker:
 
     # TODO limit maximum number of upgrades?
     # TODO elder pledge
-    # TODO dragon cookie
     # TODO bingo research purchase
     # TODO periodic save
     # TODO don't click wraith cookie?
