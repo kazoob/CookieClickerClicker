@@ -131,17 +131,17 @@ class Clicker:
             self.clicking_event.set()
 
             # Start cookie clicking thread.
-            cookie_thread = Thread(target=self.cookie_click)
+            cookie_thread = Thread(target=self._cookie_click)
             cookie_thread.start()
 
             # Start wrinkler popping thread.
-            wrinkler_thread = Thread(target=self.wrinkler_pop)
+            wrinkler_thread = Thread(target=self._wrinkler_pop)
             wrinkler_thread.start()
 
     def get_clicking_status(self) -> bool:
         return self.clicking_event.is_set()
 
-    def cookie_click(self):
+    def _cookie_click(self):
         """Repeatedly click the big cookie."""
         # Continue until requested to stop.
         while self.clicking_event.is_set():
@@ -166,7 +166,7 @@ class Clicker:
             # Click the big cookie.
             self.driver.execute_script('Game.ClickCookie();')
 
-    def wrinkler_pop(self):
+    def _wrinkler_pop(self):
         """Periodically check for any spawned wrinklers and pop them."""
         # Continue until requested to stop.
         while self.clicking_event.is_set():
@@ -234,7 +234,7 @@ class Clicker:
         # Continue purchasing up to maximum requested buildings.
         while count > 0:
             # If purchase was not successful (not enough cookies in bank), end while loop.
-            if not self.purchase_best_building(bulk_quantity):
+            if not self._purchase_best_building(bulk_quantity):
                 break
 
             count -= bulk_quantity
@@ -243,7 +243,7 @@ class Clicker:
         self.driver.execute_script(f'Game.storeBulkButton({BUILDINGS_PURCHASE_BULK_IDS[1]});')
         print()
 
-    def purchase_best_building(self, bulk_quantity: int = 1) -> bool:
+    def _purchase_best_building(self, bulk_quantity: int = 1) -> bool:
         """Purchase the most efficient affordable building. Return True if purchase was successful, otherwise False."""
         # Store list.
         store = []
@@ -316,14 +316,14 @@ class Clicker:
         # Continue purchasing up to maximum requested upgrades.
         while count > 0:
             # If purchase was not successful (not enough cookies in bank), end while loop.
-            if not self.purchase_next_upgrade():
+            if not self._purchase_next_upgrade():
                 break
 
             count -= 1
 
         print()
 
-    def purchase_next_upgrade(self) -> bool:
+    def _purchase_next_upgrade(self) -> bool:
         """Purchase the next allowed upgrade. Return True if purchase was successful, otherwise False."""
         # Get number of upgrades in store.
         upgrade_count = int(self.driver.execute_script('return Game.UpgradesInStore.length;'))
