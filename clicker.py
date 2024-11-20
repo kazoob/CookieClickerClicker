@@ -353,6 +353,8 @@ class Clicker:
     # TODO periodic save
     # TODO don't click wraith cookie?
     # TODO number separators
+    # TODO upgrades prioritize kittens
+    # TODO purchase stop if can't purchase best building due to no cookies
 
     def save_file(self):
         """Export save data to file."""
