@@ -378,7 +378,7 @@ class Clicker:
         # Return False to indicate no successful purchase.
         return False
 
-    # TODO limit maximum number of upgrades?
+    # TODO limit maximum number of buildings?
     # TODO elder pledge
     # TODO periodic save
     # TODO don't click wraith cookie?
