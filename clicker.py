@@ -198,49 +198,84 @@ class Clicker:
     #   <div class="framed close sidenote" onclick="PlaySound('snd/tick.mp3');Game.CloseNotes();">x</div>
     # </div>
 
+    def purchase(self, count: int = 1):
+        """Purchase most efficient affordable building, up to a maximum of 'count'. Default 1."""
+        # Continue purchasing up to maximum requested buildings.
+        while count > 0:
+            # If purchase was not successful (not enough cookies in bank), end while loop.
+            if not self.purchase_best_building():
+                break
+
+            count -= 1
+
+        print()
+
     def purchase_best_building(self) -> bool:
-        # TODO purchase best building
+        """Purchase the most efficient affordable building. Return True if purchase was successful, otherwise False."""
+        # Store list.
         store = []
+
+        # Get number of store items.
         store_count = int(self.driver.execute_script('return Game.ObjectsById.length;'))
 
+        # Get global cps multiplier.
         global_cps_mult = float(self.driver.execute_script(f'return Game.globalCpsMult;'))
+
+        # Get number of cookies in bank.
         cookies = float(self.driver.execute_script(f'return Game.cookies;'))
 
+        # Examine each store item.
         for i in range(0, store_count):
+            # Determine if store item is available or locked.
             store_item_locked = int(self.driver.execute_script(f'return Game.ObjectsById[{i}].locked;'))
 
+            # Store item is available (not locked).
             if store_item_locked == 0:
+                # Get store item name.
                 store_item_name = self.driver.execute_script(f'return Game.ObjectsById[{i}].dname;')
+
+                # Get store item price.
                 store_item_price = int(self.driver.execute_script(f'return Game.ObjectsById[{i}].price;'))
-                # Alternate CPS formula from source code: (me.storedTotalCps / me.amount) * Game.globalCpsMult
+
+                # Get store item cps.
+                # Alternate cps formula from source code: (me.storedTotalCps / me.amount) * Game.globalCpsMult
                 store_item_cps = float(
                     self.driver.execute_script(f'return Game.ObjectsById[{i}].storedCps;')) * global_cps_mult
 
+                # Proceed if store item is purchasable (have enough cookies in bank).
                 if cookies >= store_item_price:
+                    # Calculate store item efficiency.
                     store_item_efficiency = (store_item_cps * global_cps_mult) / store_item_price
                 else:
+                    # Mark store item as not purchasable.
                     store_item_efficiency = -1
 
-                store.append(
-                    {
-                        "id": i,
-                        "name": store_item_name,
-                        "price": store_item_price,
-                        "cps": store_item_cps,
-                        "efficiency": store_item_efficiency,
-                    }
-                )
+                # If store item is purchasable, add to store list.
+                if store_item_efficiency != -1:
+                    store.append(
+                        {
+                            "id": i,
+                            "name": store_item_name,
+                            "price": store_item_price,
+                            "cps": store_item_cps,
+                            "efficiency": store_item_efficiency,
+                        }
+                    )
 
+        # Sort store list by efficiency, from largest to smallest.
         store = sorted(store, key=itemgetter('efficiency'), reverse=True)
 
+        # Verify at least one store item exists.
         if len(store) > 0:
+            # Purchase most efficient store item.
             self.driver.execute_script(f'Game.ClickProduct({store[0]["id"]});')
             print(f"Purchased {store[0]["name"]} for {store[0]["price"]} cookies, "
                   f"generating {round(store[0]["cps"], 1)} cps")
-            print()
 
+            # Return True indicating successful purchase.
             return True
 
+        # Return False indicating no successful purchase.
         return False
 
     # TODO elder pledge
