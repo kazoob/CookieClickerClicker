@@ -383,6 +383,8 @@ class Clicker:
         return False
 
     # TODO elder pledge
+    # Game.pledgeT
+    # Game.UpgradesById[74].click()
     # TODO periodic save
 
     def save_file(self):
