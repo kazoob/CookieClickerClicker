@@ -153,7 +153,7 @@ class Clicker:
         # From https://stackoverflow.com/a/3155023
         millidx = max(0, min(len(MILLNAMES) - 1, int(math.floor(0 if n == 0 else math.log10(abs(n)) / 3))))
 
-        return '{:.3f}{}'.format(n / 10 ** (3 * millidx), MILLNAMES[millidx])
+        return '{:.3f}{}'.format(n / 10 ** (3 * millidx), MILLNAMES[millidx]).lower()
 
     def toggle_clicking(self):
         """Start / stop cookie clicking."""
