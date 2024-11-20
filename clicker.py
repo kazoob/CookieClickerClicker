@@ -326,3 +326,5 @@ class Clicker:
 
         # Quit browser.
         self.driver.quit()
+
+# Tips https://gist.github.com/ob-ivan/6800011
