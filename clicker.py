@@ -30,7 +30,7 @@ BUILDINGS_BULK_IDS = {
 UPGRADES_ALLOWED = {
     "prestige": -1,
     "kitten": -1,
-    "tech": [65, 66, 67, 68, 70, 71, 72],
+    "tech": [65, 66, 67, 68, 70, 71, 72, 73, 87],
     "": -1,
     "cookie": -1,
 }
