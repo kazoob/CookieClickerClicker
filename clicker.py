@@ -384,7 +384,7 @@ class Clicker:
     # TODO periodic save
     # TODO don't click wraith cookie?
     # TODO number separators
-    # TODO upgrades prioritize kittens
+    # TODO upgrades prioritize kittens and heavenly upgrades
     # TODO purchase stop if can't purchase best building due to no cookies
 
     def save_file(self):
