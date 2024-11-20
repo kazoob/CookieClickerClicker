@@ -286,8 +286,6 @@ class Clicker:
         # Return False indicating no successful purchase.
         return False
 
-    # TODO limit maximum number of upgrades?
-
     def purchase_upgrade(self, count: int = 1):
         """Purchase next allowed upgrade, up to a maximum of 'count'. Default 1."""
         # Continue purchasing up to maximum requested upgrades.
@@ -349,12 +347,14 @@ class Clicker:
         # Return False to indicate no successful purchase.
         return False
 
+    # TODO limit maximum number of upgrades?
     # TODO elder pledge
+    # TODO dragon cookie
     # TODO bingo research purchase
+    # TODO periodic save
 
     def save_file(self):
         """Export save data to file."""
-        # TODO periodic save
         # Get save data.
         save_data = self.driver.execute_script('return Game.WriteSave(1);')
 
