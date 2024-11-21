@@ -474,7 +474,7 @@ class Clicker:
     def _auto_purchase_thread(self):
         """Automatically purchase all available upgrades and buildings at defined intervals."""
         # Set next auto purchase interval to now.
-        auto_purchase = time.time()
+        auto_purchase = time.time() + PURCHASE_AUTO_MINUTES * 60
 
         # Continue until requested to stop.
         while self.clicking_event.is_set():
@@ -508,7 +508,8 @@ class Clicker:
 
         # Purchase all available buildings.
         while self._purchase_best_building(10):
-            pass
+            # Purchase all upgrades if "Inspired checklist" is unlocked.
+            self.driver.execute_script(f'Game.storeBuyAll();')
 
         # Set bulk purchasing mode x1.
         self.driver.execute_script(f'Game.storeBulkButton({BUILDINGS_BULK_IDS[1]});')
