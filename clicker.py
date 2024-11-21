@@ -443,7 +443,7 @@ class Clicker:
     def _purchase_all_upgrades(self, display_message: bool = False):
         """Attempt to purchase all available upgrades. Only works if 'Inspired checklist' is unlocked."""
         if display_message:
-            print("Purchasing all upgrades.")
+            print("Attempting to purchasing all upgrades.")
             print()
 
         self.driver.execute_script(f'Game.storeBuyAll();')
