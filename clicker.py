@@ -191,6 +191,8 @@ class Clicker:
             auto_purchase_thread = Thread(target=self._auto_purchase_thread)
             auto_purchase_thread.start()
 
+            # TODO fortune click
+
     def get_clicking_status(self) -> bool:
         return self.clicking_event.is_set()
 
