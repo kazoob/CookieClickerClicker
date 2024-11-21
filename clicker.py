@@ -38,6 +38,7 @@ UPGRADES_ALLOWED = {
 
 PURCHASE_AUTO_MINUTES = 15
 PURCHASE_AUTO_UPGRADES = 10
+PURCHASE_AUTO_BUILDINGS_BULK = 90
 PURCHASE_AUTO_BUILDINGS = 20
 
 ELDER_PLEDGE_ID = 74
@@ -486,6 +487,7 @@ class Clicker:
                 self.purchase_upgrade(PURCHASE_AUTO_UPGRADES)
 
                 # Purchase buildings.
+                self.purchase_building(PURCHASE_AUTO_BUILDINGS_BULK, True)
                 self.purchase_building(PURCHASE_AUTO_BUILDINGS, False)
 
                 # Set next auto purchase interval.
