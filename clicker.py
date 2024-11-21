@@ -492,6 +492,7 @@ class Clicker:
     def auto_purchase(self):
         """Automatically purchase all available upgrades and buildings."""
         # Purchase all available upgrades.
+        # TODO review Game.storeBuyAll();
         while self._purchase_next_upgrade():
             pass
 
