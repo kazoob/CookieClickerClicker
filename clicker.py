@@ -36,6 +36,10 @@ UPGRADES_ALLOWED = {
     "cookie": -1,
 }
 
+PURCHASE_AUTO_MINUTES = 15
+PURCHASE_AUTO_UPGRADES = 10
+PURCHASE_AUTO_BUILDINGS = 20
+
 ELDER_PLEDGE_ID = 74
 
 INTERACTION_DELAY = 1
@@ -184,6 +188,10 @@ class Clicker:
             # Start auto save thread.
             auto_save_thread = Thread(target=self._auto_save)
             auto_save_thread.start()
+
+            # Start auto purchase thread.
+            auto_purchase_thread = Thread(target=self._auto_purchase)
+            auto_purchase_thread.start()
 
     def get_clicking_status(self) -> bool:
         return self.clicking_event.is_set()
@@ -461,6 +469,27 @@ class Clicker:
 
                 # Set next auto save interval.
                 auto_save_next = time.time() + SAVE_DATA_AUTO_HOURS * 3600
+
+            # Throttle the next auto save check.
+            time.sleep(THREAD_DELAY)
+
+    def _auto_purchase(self):
+        """Automatically purchase upgrades and buildings at defined intervals."""
+        # Set next auto purchase interval to now.
+        auto_purchase = time.time()
+
+        # Continue until requested to stop.
+        while self.clicking_event.is_set():
+            # Check if we have reached the auto purchase interval.
+            if time.time() >= auto_purchase:
+                # Purchase upgrades.
+                self.purchase_upgrade(PURCHASE_AUTO_UPGRADES)
+
+                # Purchase buildings.
+                self.purchase_building(PURCHASE_AUTO_BUILDINGS, False)
+
+                # Set next auto purchase interval.
+                auto_purchase = time.time() + PURCHASE_AUTO_MINUTES * 60
 
             # Throttle the next auto save check.
             time.sleep(THREAD_DELAY)
