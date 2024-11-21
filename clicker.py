@@ -188,7 +188,7 @@ class Clicker:
             auto_save_thread.start()
 
             # Start auto purchase thread.
-            auto_purchase_thread = Thread(target=self._auto_purchase)
+            auto_purchase_thread = Thread(target=self._auto_purchase_thread)
             auto_purchase_thread.start()
 
     def get_clicking_status(self) -> bool:
@@ -471,7 +471,7 @@ class Clicker:
             # Throttle the next auto save check.
             time.sleep(THREAD_DELAY)
 
-    def _auto_purchase(self):
+    def _auto_purchase_thread(self):
         """Automatically purchase all available upgrades and buildings at defined intervals."""
         # Set next auto purchase interval to now.
         auto_purchase = time.time()
@@ -480,29 +480,34 @@ class Clicker:
         while self.clicking_event.is_set():
             # Check if we have reached the auto purchase interval.
             if time.time() >= auto_purchase:
-                # Purchase all available upgrades.
-                while self._purchase_next_upgrade():
-                    pass
-
-                # Set bulk purchasing mode x10.
-                self.driver.execute_script(f'Game.storeBulkButton({BUILDINGS_BULK_IDS[10]});')
-
-                # Purchase all available buildings.
-                while self._purchase_best_building(10):
-                    pass
-
-                # Set bulk purchasing mode x1.
-                self.driver.execute_script(f'Game.storeBulkButton({BUILDINGS_BULK_IDS[1]});')
-
-                # Purchase all available upgrades again.
-                while self._purchase_next_upgrade():
-                    pass
+                # Purchase all available buildings and upgrades.
+                self.auto_purchase()
 
                 # Set next auto purchase interval.
                 auto_purchase = time.time() + PURCHASE_AUTO_MINUTES * 60
 
             # Throttle the next auto save check.
             time.sleep(THREAD_DELAY)
+
+    def auto_purchase(self):
+        """Automatically purchase all available upgrades and buildings."""
+        # Purchase all available upgrades.
+        while self._purchase_next_upgrade():
+            pass
+
+        # Set bulk purchasing mode x10.
+        self.driver.execute_script(f'Game.storeBulkButton({BUILDINGS_BULK_IDS[10]});')
+
+        # Purchase all available buildings.
+        while self._purchase_best_building(10):
+            pass
+
+        # Set bulk purchasing mode x1.
+        self.driver.execute_script(f'Game.storeBulkButton({BUILDINGS_BULK_IDS[1]});')
+
+        # Purchase all available upgrades again.
+        while self._purchase_next_upgrade():
+            pass
 
     def quit(self, save: bool = True):
         """Save the game data to file. Quit the game."""

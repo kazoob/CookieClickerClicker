@@ -40,6 +40,7 @@ while menu_input != "q" and menu_input != "x":
     print("p # b = Purchase best # buildings (bulk)")
     print("u     = Purchase next upgrade")
     print("u #   = Purchase next # upgrades")
+    print("a     = Purchase all available upgrades and buildings")
     print("s     = Save game to file")
     print("q     = Quit (save)")
     print("x     = Quit (do not save)")
@@ -67,6 +68,9 @@ while menu_input != "q" and menu_input != "x":
     elif menu_input.startswith("u"):
         # Purchase requested number of upgrades (maximum).
         clicker.purchase_upgrade(get_count(menu_input))
+    # Purchase all available upgrades and buildings.
+    elif menu_input.startswith("a"):
+        clicker.auto_purchase()
     # Quit and save data.
     elif menu_input.startswith("q"):
         clicker.quit(save=True)
