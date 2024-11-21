@@ -68,6 +68,14 @@ MILLNAMES = [
 ]
 
 
+def millify(n: float) -> str:
+    """Convert large number to human friendly string."""
+    # From https://stackoverflow.com/a/3155023
+    millidx = max(0, min(len(MILLNAMES) - 1, int(math.floor(0 if n == 0 else math.log10(abs(n)) / 3))))
+
+    return '{:.3f}{}'.format(n / 10 ** (3 * millidx), MILLNAMES[millidx]).lower()
+
+
 class Clicker:
     """Open game in browser. Set up game. Import save data (if found). Start clicking if save data imported."""
 
@@ -150,13 +158,6 @@ class Clicker:
         # If save data loaded successfully, start clicking.
         if save_data_result:
             self.toggle_clicking()
-
-    def _millify(self, n: float) -> str:
-        """Convert large number to human friendly string."""
-        # From https://stackoverflow.com/a/3155023
-        millidx = max(0, min(len(MILLNAMES) - 1, int(math.floor(0 if n == 0 else math.log10(abs(n)) / 3))))
-
-        return '{:.3f}{}'.format(n / 10 ** (3 * millidx), MILLNAMES[millidx]).lower()
 
     def toggle_clicking(self):
         """Start / stop cookie clicking."""
@@ -342,8 +343,8 @@ class Clicker:
         if len(store) > 0:
             # Purchase most efficient store item.
             self.driver.execute_script(f'Game.ClickProduct({store[0]["id"]});')
-            print(f"Purchased {bulk_quantity} x {store[0]["name"]} for {self._millify(store[0]["price"])} cookies, "
-                  f"generating {self._millify(store[0]["cps"])} cps")
+            print(f"Purchased {bulk_quantity} x {store[0]["name"]} for {millify(store[0]["price"])} cookies, "
+                  f"generating {millify(store[0]["cps"])} cps")
 
             # Return True indicating successful purchase.
             return True
@@ -406,7 +407,7 @@ class Clicker:
                             if UPGRADES_ALLOWED[upgrade_pool] == -1 or upgrade_id in UPGRADES_ALLOWED[upgrade_pool]:
                                 # Purchase upgrade.
                                 self.driver.execute_script(f'return Game.UpgradesInStore[{i}].click();')
-                                print(f"Purchased '{upgrade_name}' for {self._millify(upgrade_price)} cookies")
+                                print(f"Purchased '{upgrade_name}' for {millify(upgrade_price)} cookies")
 
                                 # Return True to indicate successful purchase.
                                 return True
@@ -470,8 +471,8 @@ class Clicker:
         if self.clicking_event.is_set():
             self.clicking_event.clear()
 
-            # Wait for wrinkler thread to end.
-            time.sleep(THREAD_DELAY)
+            # Wait for threads to end.
+            time.sleep(THREAD_DELAY + 1)
 
         # Save game data to file if requested.
         if save:
