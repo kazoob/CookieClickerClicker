@@ -492,9 +492,9 @@ class Clicker:
     def auto_purchase(self):
         """Automatically purchase all available upgrades and buildings."""
         # Purchase all available upgrades.
-        # TODO review Game.storeBuyAll();
         while self._purchase_next_upgrade():
-            pass
+            # Purchase all upgrades if "Inspired checklist" is unlocked.
+            self.driver.execute_script(f'Game.storeBuyAll();')
 
         # Set bulk purchasing mode x100.
         self.driver.execute_script(f'Game.storeBulkButton({BUILDINGS_BULK_IDS[100]});')
@@ -516,7 +516,8 @@ class Clicker:
 
         # Purchase all available upgrades again.
         while self._purchase_next_upgrade():
-            pass
+            # Purchase all upgrades if "Inspired checklist" is unlocked.
+            self.driver.execute_script(f'Game.storeBuyAll();')
 
     def quit(self, save: bool = True):
         """Save the game data to file. Quit the game."""
