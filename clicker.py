@@ -35,6 +35,8 @@ UPGRADES_ALLOWED = {
     "cookie": -1,
 }
 
+ELDER_PLEDGE_ID = 74
+
 INTERACTION_DELAY = 1
 ELEMENT_WAIT_DELAY = 5
 WRINKLER_CHECK_FREQUENCY = 5
@@ -173,6 +175,10 @@ class Clicker:
             wrinkler_thread = Thread(target=self._wrinkler_pop)
             wrinkler_thread.start()
 
+            # Start elder pledge thread.
+            elder_pledge_thread = Thread(target=self._elder_pledge)
+            elder_pledge_thread.start()
+
     def get_clicking_status(self) -> bool:
         return self.clicking_event.is_set()
 
@@ -212,6 +218,28 @@ class Clicker:
                 )
             except JavascriptException:
                 pass
+
+            # Throttle the next wrinkler check.
+            time.sleep(WRINKLER_CHECK_FREQUENCY)
+
+    def _elder_pledge(self):
+        # Continue until requested to stop.
+        while self.clicking_event.is_set():
+            # Get elder pledge unlocked status.
+            pledge_unlocked = int(self.driver.execute_script(f'return Game.UpgradesById[{ELDER_PLEDGE_ID}].unlocked;'))
+
+            # Check if elder pledge is unlocked.
+            if pledge_unlocked == 1:
+                # Get elder pledge remaining time.
+                pledge_time = int(self.driver.execute_script(f'return Game.pledgeT;'))
+
+                # Check if elder pledge time has run out.
+                if pledge_time <= 0:
+                    try:
+                        # Purchase elder pledge.
+                        self.driver.execute_script(f'return Game.UpgradesById[{ELDER_PLEDGE_ID}].click();')
+                    except JavascriptException:
+                        pass
 
             # Throttle the next wrinkler check.
             time.sleep(WRINKLER_CHECK_FREQUENCY)
@@ -382,9 +410,6 @@ class Clicker:
         # Return False to indicate no successful purchase.
         return False
 
-    # TODO elder pledge
-    # Game.pledgeT
-    # Game.UpgradesById[74].click()
     # TODO periodic save
 
     def save_file(self):
