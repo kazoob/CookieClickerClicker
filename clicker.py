@@ -20,6 +20,7 @@ URL = "https://orteil.dashnet.org/cookieclicker/"
 
 SAVE_DATA_FILENAME = "save_data.txt"
 SAVE_DATA_BACKUP_COUNT = 10
+SAVE_DATA_AUTO_HOURS = 6
 
 BUILDINGS_BULK_IDS = {
     1: 2,
@@ -39,7 +40,7 @@ ELDER_PLEDGE_ID = 74
 
 INTERACTION_DELAY = 1
 ELEMENT_WAIT_DELAY = 5
-WRINKLER_CHECK_FREQUENCY = 5
+THREAD_DELAY = 5
 
 MILLNAMES = [
     '',
@@ -179,6 +180,10 @@ class Clicker:
             elder_pledge_thread = Thread(target=self._elder_pledge)
             elder_pledge_thread.start()
 
+            # Start auto save thread.
+            auto_save_thread = Thread(target=self._auto_save)
+            auto_save_thread.start()
+
     def get_clicking_status(self) -> bool:
         return self.clicking_event.is_set()
 
@@ -220,9 +225,11 @@ class Clicker:
                 pass
 
             # Throttle the next wrinkler check.
-            time.sleep(WRINKLER_CHECK_FREQUENCY)
+            time.sleep(THREAD_DELAY)
 
     def _elder_pledge(self):
+        """Periodically check if the elder pledge is unlocked, and elder pledge remaining time has run out.
+        If so, automatically purchase a new elder pledge."""
         # Continue until requested to stop.
         while self.clicking_event.is_set():
             # Get elder pledge unlocked status.
@@ -241,8 +248,8 @@ class Clicker:
                     except JavascriptException:
                         pass
 
-            # Throttle the next wrinkler check.
-            time.sleep(WRINKLER_CHECK_FREQUENCY)
+            # Throttle the next elder pledge check.
+            time.sleep(THREAD_DELAY)
 
     def purchase_building(self, count: int = 1, bulk: bool = False):
         """Purchase most efficient affordable building, up to a maximum of 'count'. Default 1."""
@@ -410,8 +417,6 @@ class Clicker:
         # Return False to indicate no successful purchase.
         return False
 
-    # TODO periodic save
-
     def save_file(self):
         """Export save data to file."""
         # Get save data.
@@ -441,6 +446,24 @@ class Clicker:
             with open(file=SAVE_DATA_FILENAME, mode="w") as save_file:
                 save_file.write(save_data)
 
+    def _auto_save(self):
+        """Automatically save the game at defined interval."""
+        # Set next auto save interval.
+        auto_save_next = time.time() + SAVE_DATA_AUTO_HOURS * 3600
+
+        # Continue until requested to stop.
+        while self.clicking_event.is_set():
+            # Check if we have reached the auto save interval.
+            if time.time() >= auto_save_next:
+                # Save the game.
+                self.save_file()
+
+                # Set next auto save interval.
+                auto_save_next = time.time() + SAVE_DATA_AUTO_HOURS * 3600
+
+            # Throttle the next auto save check.
+            time.sleep(THREAD_DELAY)
+
     def quit(self, save: bool = True):
         """Save the game data to file. Quit the game."""
         # Stop clicking threads.
@@ -448,7 +471,7 @@ class Clicker:
             self.clicking_event.clear()
 
             # Wait for wrinkler thread to end.
-            time.sleep(WRINKLER_CHECK_FREQUENCY)
+            time.sleep(THREAD_DELAY)
 
         # Save game data to file if requested.
         if save:
