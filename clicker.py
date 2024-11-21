@@ -37,9 +37,6 @@ UPGRADES_ALLOWED = {
 }
 
 PURCHASE_AUTO_MINUTES = 15
-PURCHASE_AUTO_UPGRADES = 20
-PURCHASE_AUTO_BUILDINGS_BULK = 90
-PURCHASE_AUTO_BUILDINGS = 20
 
 ELDER_PLEDGE_ID = 74
 
@@ -475,7 +472,7 @@ class Clicker:
             time.sleep(THREAD_DELAY)
 
     def _auto_purchase(self):
-        """Automatically purchase upgrades and buildings at defined intervals."""
+        """Automatically purchase all available upgrades and buildings at defined intervals."""
         # Set next auto purchase interval to now.
         auto_purchase = time.time()
 
@@ -483,16 +480,23 @@ class Clicker:
         while self.clicking_event.is_set():
             # Check if we have reached the auto purchase interval.
             if time.time() >= auto_purchase:
-                # Purchase upgrades.
-                self.purchase_upgrade(PURCHASE_AUTO_UPGRADES)
+                # Purchase all available upgrades.
+                while self._purchase_next_upgrade():
+                    pass
 
-                # Purchase buildings.
-                self.purchase_building(PURCHASE_AUTO_BUILDINGS_BULK, True)
-                self.purchase_building(PURCHASE_AUTO_BUILDINGS_BULK, True)
-                self.purchase_building(PURCHASE_AUTO_BUILDINGS_BULK, True)
-                self.purchase_building(PURCHASE_AUTO_BUILDINGS_BULK, True)
-                self.purchase_building(PURCHASE_AUTO_BUILDINGS_BULK, True)
-                self.purchase_building(PURCHASE_AUTO_BUILDINGS, False)
+                # Set bulk purchasing mode x10.
+                self.driver.execute_script(f'Game.storeBulkButton({BUILDINGS_BULK_IDS[10]});')
+
+                # Purchase all available buildings.
+                while self._purchase_best_building(10):
+                    pass
+
+                # Set bulk purchasing mode x1.
+                self.driver.execute_script(f'Game.storeBulkButton({BUILDINGS_BULK_IDS[1]});')
+
+                # Purchase all available upgrades again.
+                while self._purchase_next_upgrade():
+                    pass
 
                 # Set next auto purchase interval.
                 auto_purchase = time.time() + PURCHASE_AUTO_MINUTES * 60
