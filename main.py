@@ -26,15 +26,24 @@ menu_input: str = ""
 # Display menu.
 while menu_input != "q" and menu_input != "x":
     # Display correct enable / disable clicking string
-    # Currently clicking
     if clicker.get_clicking_status():
+        # Clicking is currently enabled, menu to disable
         clicking_string = "Disable"
-    # Currently not clicking
     else:
+        # Clicking is currently disabled, menu to enable
         clicking_string = "Enable"
 
+    # Display correct enable / disable clicking string
+    if clicker.get_elder_pledge_status():
+        # Elder Pledge is currently enabled, menu to disable
+        elder_pledge_string = "Disable"
+    else:
+        # Elder Pledge is currently disabled, menu to enable
+        elder_pledge_string = "Enable"
+
     print("Menu: ")
-    print(f"c     = {clicking_string} clicking")
+    print(f"c     = {clicking_string} cookie / golden cookie / wrath clicking")
+    print(f"e     = {elder_pledge_string} Elder Pledge purchase")
     print("p     = Purchase best building")
     print("p #   = Purchase best # buildings (individually)")
     print("p # b = Purchase best # buildings (bulk)")
@@ -55,6 +64,9 @@ while menu_input != "q" and menu_input != "x":
     # Start / stop clicking.
     if menu_input.startswith("c"):
         clicker.toggle_clicking()
+    # Start / stop Elder Pledge purchase.
+    elif menu_input.startswith("e"):
+        clicker.toggle_elder_pledge()
     # Save game data to file.
     elif menu_input.startswith("s"):
         clicker.save_file()

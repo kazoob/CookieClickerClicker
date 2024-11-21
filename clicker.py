@@ -154,8 +154,11 @@ class Clicker:
         self.driver.execute_script('Game.prefs.showBackupWarning = 0; Game.CloseNote(1);')
         time.sleep(INTERACTION_DELAY)
 
-        # Do not click cookie by default.
+        # Clicking thread event. Do not click cookie by default.
         self.clicking_event = Event()
+
+        # Set the elder pledge to be purchased automatically.
+        self.elder_pledge_buy = True
 
         # If save data loaded successfully, start clicking.
         if save_data_result:
@@ -241,24 +244,35 @@ class Clicker:
         If so, automatically purchase a new elder pledge."""
         # Continue until requested to stop.
         while self.clicking_event.is_set():
-            # Get elder pledge unlocked status.
-            pledge_unlocked = int(self.driver.execute_script(f'return Game.UpgradesById[{ELDER_PLEDGE_ID}].unlocked;'))
+            # Check if elder pledge is set to purchase automatically.
+            if self.elder_pledge_buy:
+                # Get elder pledge unlocked status.
+                pledge_unlocked = int(
+                    self.driver.execute_script(f'return Game.UpgradesById[{ELDER_PLEDGE_ID}].unlocked;'))
 
-            # Check if elder pledge is unlocked.
-            if pledge_unlocked == 1:
-                # Get elder pledge remaining time.
-                pledge_time = int(self.driver.execute_script(f'return Game.pledgeT;'))
+                # Check if elder pledge is unlocked.
+                if pledge_unlocked == 1:
+                    # Get elder pledge remaining time.
+                    pledge_time = int(self.driver.execute_script(f'return Game.pledgeT;'))
 
-                # Check if elder pledge time has run out.
-                if pledge_time <= 0:
-                    try:
-                        # Purchase elder pledge.
-                        self.driver.execute_script(f'return Game.UpgradesById[{ELDER_PLEDGE_ID}].click();')
-                    except JavascriptException:
-                        pass
+                    # Check if elder pledge time has run out.
+                    if pledge_time <= 0:
+                        try:
+                            # Purchase elder pledge.
+                            self.driver.execute_script(f'return Game.UpgradesById[{ELDER_PLEDGE_ID}].click();')
+                        except JavascriptException:
+                            pass
 
             # Throttle the next elder pledge check.
             time.sleep(THREAD_DELAY)
+
+    def toggle_elder_pledge(self):
+        """Toggle the elder pledge automatic purchase status."""
+        self.elder_pledge_buy = not self.elder_pledge_buy
+
+    def get_elder_pledge_status(self) -> bool:
+        """Return the elder pledge automatic purchase status."""
+        return self.elder_pledge_buy
 
     def purchase_building(self, count: int = 1, bulk: bool = False):
         """Purchase most efficient affordable building, up to a maximum of 'count'. Default 1."""
