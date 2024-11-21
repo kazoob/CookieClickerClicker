@@ -473,7 +473,7 @@ class Clicker:
 
     def _auto_purchase_thread(self):
         """Automatically purchase all available upgrades and buildings at defined intervals."""
-        # Set next auto purchase interval to now.
+        # Set next auto purchase interval.
         auto_purchase = time.time() + PURCHASE_AUTO_MINUTES * 60
 
         # Continue until requested to stop.
