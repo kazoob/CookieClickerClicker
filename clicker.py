@@ -495,6 +495,13 @@ class Clicker:
         while self._purchase_next_upgrade():
             pass
 
+        # Set bulk purchasing mode x100.
+        self.driver.execute_script(f'Game.storeBulkButton({BUILDINGS_BULK_IDS[100]});')
+
+        # Purchase all available buildings.
+        while self._purchase_best_building(100):
+            pass
+
         # Set bulk purchasing mode x10.
         self.driver.execute_script(f'Game.storeBulkButton({BUILDINGS_BULK_IDS[10]});')
 
