@@ -440,6 +440,14 @@ class Clicker:
         # Return False to indicate no successful purchase.
         return False
 
+    def _purchase_all_upgrades(self, display_message: bool = False):
+        """Attempt to purchase all available upgrades. Only works if 'Inspired checklist' is unlocked."""
+        if display_message:
+            print("Purchasing all upgrades.")
+            print()
+
+        self.driver.execute_script(f'Game.storeBuyAll();')
+
     def save_file(self):
         """Export save data to file."""
         # Get save data.
@@ -509,11 +517,10 @@ class Clicker:
         """Automatically purchase all available upgrades and buildings."""
         # Purchase all available upgrades.
         # Purchase all upgrades if "Inspired checklist" is unlocked.
-        upgrades_buy_all_status = self.driver.execute_script(f'return Game.storeBuyAll();')
-        # Otherwise purchase manually
-        if not upgrades_buy_all_status:
-            while self._purchase_next_upgrade():
-                pass
+        self._purchase_all_upgrades(True)
+        # Otherwise purchase manually.
+        while self._purchase_next_upgrade():
+            pass
 
         # Set bulk purchasing mode x100.
         self.driver.execute_script(f'Game.storeBulkButton({BUILDINGS_BULK_IDS[100]});')
@@ -528,18 +535,17 @@ class Clicker:
         # Purchase all available buildings.
         while self._purchase_best_building(10):
             # Purchase all upgrades if "Inspired checklist" is unlocked.
-            self.driver.execute_script(f'Game.storeBuyAll();')
+            self._purchase_all_upgrades(False)
 
         # Set bulk purchasing mode x1.
         self.driver.execute_script(f'Game.storeBulkButton({BUILDINGS_BULK_IDS[1]});')
 
         # Purchase all available upgrades again.
         # Purchase all upgrades if "Inspired checklist" is unlocked.
-        upgrades_buy_all_status = self.driver.execute_script(f'return Game.storeBuyAll();')
-        # Otherwise purchase manually
-        if not upgrades_buy_all_status:
-            while self._purchase_next_upgrade():
-                pass
+        self._purchase_all_upgrades(True)
+        # Otherwise purchase manually.
+        while self._purchase_next_upgrade():
+            pass
 
     def quit(self, save: bool = True):
         """Save the game data to file. Quit the game."""
