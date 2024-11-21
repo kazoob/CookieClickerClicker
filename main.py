@@ -49,6 +49,8 @@ while menu_input != "q" and menu_input != "x":
     menu_input = input("Enter your selection: ").lower()
     print()
 
+    # TODO fix menu prompt display after auto purchase
+
     # Start / stop clicking.
     if menu_input.startswith("c"):
         clicker.toggle_clicking()
