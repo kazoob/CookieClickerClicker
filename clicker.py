@@ -513,6 +513,8 @@ class Clicker:
             # Throttle the next auto save check.
             time.sleep(THREAD_DELAY)
 
+    # TODO toggle auto purchase
+
     def auto_purchase(self):
         """Automatically purchase all available upgrades and buildings."""
         # Purchase all available upgrades.
