@@ -198,6 +198,7 @@ class Clicker:
             auto_purchase_thread.start()
 
             # TODO fortune click
+            #<div id="commentsText1" class="commentsText risingUp"><span class="fortune"><div class="icon" style="vertical-align:middle;display:inline-block;background-position:-1392px -384px;transform:scale(0.5);margin:-16px;position:relative;left:-4px;top:-2px;"></div>#003 : The seeds of tomorrow already lie within the seeds of today.</span></div>
 
     def get_clicking_status(self) -> bool:
         return self.clicking_event.is_set()
@@ -540,7 +541,8 @@ class Clicker:
 
         # Purchase all available buildings.
         while self._purchase_best_building(100):
-            pass
+            # Purchase all upgrades if "Inspired checklist" is unlocked.
+            self._purchase_all_upgrades(False)
 
         # Set bulk purchasing mode x10.
         self.driver.execute_script(f'Game.storeBulkButton({BUILDINGS_BULK_IDS[10]});')
