@@ -1,7 +1,7 @@
 
   
 # CookieClickerClicker
-A personal clicking bot and purchasing automator for the browser game Cookie Clicker.
+An unofficial personal clicking bot and purchasing automator for the browser game Cookie Clicker.
 
 https://orteil.dashnet.org/cookieclicker/
 
