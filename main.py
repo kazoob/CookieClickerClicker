@@ -53,7 +53,7 @@ while menu_input != "q" and menu_input != "x":
     print(f"c     = {clicking_string} big cookie / golden cookie / special cookie clicking")
     print(f"e     = {elder_pledge_string} Elder Pledge purchase")
     print(f"d     = {auto_purchase_string} auto purchase")
-    print("a     = Purchase all available upgrades and buildings")
+    print("a     = Purchase all available upgrades and buildings (bulk x100 and x10)")
     print("p     = Purchase best building")
     print("p #   = Purchase best # buildings (individually)")
     print("p # b = Purchase best # buildings (bulk)")
