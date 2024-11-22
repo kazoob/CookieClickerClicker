@@ -43,6 +43,7 @@ ELDER_PLEDGE_ID = 74
 INTERACTION_DELAY = 1
 ELEMENT_WAIT_DELAY = 5
 THREAD_DELAY = 5
+FORTUNE_THREAD_DELAY = 3
 
 MILLNAMES = [
     '',
@@ -197,8 +198,9 @@ class Clicker:
             auto_purchase_thread = Thread(target=self._auto_purchase_thread)
             auto_purchase_thread.start()
 
-            # TODO fortune click
-            #<div id="commentsText1" class="commentsText risingUp"><span class="fortune"><div class="icon" style="vertical-align:middle;display:inline-block;background-position:-1392px -384px;transform:scale(0.5);margin:-16px;position:relative;left:-4px;top:-2px;"></div>#003 : The seeds of tomorrow already lie within the seeds of today.</span></div>
+            # Start fortune click thread.
+            fortune_thread = Thread(target=self._fortune_thread)
+            fortune_thread.start()
 
     def get_clicking_status(self) -> bool:
         return self.clicking_event.is_set()
@@ -569,7 +571,7 @@ class Clicker:
             self.clicking_event.clear()
 
             # Wait for threads to end.
-            time.sleep(THREAD_DELAY + 1)
+            time.sleep(max(THREAD_DELAY, FORTUNE_THREAD_DELAY) + 1)
 
         # Save game data to file if requested.
         if save:
@@ -577,5 +579,23 @@ class Clicker:
 
         # Quit browser.
         self.driver.quit()
+
+    def _fortune_thread(self):
+        """Periodically check for and click on any fortunes found in the news."""
+        # Continue until requested to stop.
+        while self.clicking_event.is_set():
+            # https://www.reddit.com/r/CookieClicker/comments/gklzyv/is_there_any_script_for_clicking_the_fortune_in/
+            try:
+                self.driver.execute_script(
+                    'if (Game.TickerEffect && Game.TickerEffect.type == "fortune")'
+                    '{'
+                    '   Game.tickerL.click();'
+                    '}'
+                )
+            except JavascriptException:
+                pass
+
+            # Throttle the next fortune check.
+            time.sleep(FORTUNE_THREAD_DELAY)
 
 # Tips https://gist.github.com/ob-ivan/6800011
