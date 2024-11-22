@@ -157,8 +157,11 @@ class Clicker:
         # Clicking thread event. Do not click cookie by default.
         self.clicking_event = Event()
 
-        # Set the elder pledge to be purchased automatically.
-        self.elder_pledge_buy = True
+        # Enable elder pledge auto purchase.
+        self.elder_pledge_flag = True
+
+        # Enable upgrade / building auto purchase.
+        self.auto_purchase_flag = True
 
         # If save data loaded successfully, start clicking.
         if save_data_result:
@@ -245,7 +248,7 @@ class Clicker:
         # Continue until requested to stop.
         while self.clicking_event.is_set():
             # Check if elder pledge is set to purchase automatically.
-            if self.elder_pledge_buy:
+            if self.elder_pledge_flag:
                 # Get elder pledge unlocked status.
                 pledge_unlocked = int(
                     self.driver.execute_script(f'return Game.UpgradesById[{ELDER_PLEDGE_ID}].unlocked;'))
@@ -268,11 +271,11 @@ class Clicker:
 
     def toggle_elder_pledge(self):
         """Toggle the elder pledge automatic purchase status."""
-        self.elder_pledge_buy = not self.elder_pledge_buy
+        self.elder_pledge_flag = not self.elder_pledge_flag
 
     def get_elder_pledge_status(self) -> bool:
         """Return the elder pledge automatic purchase status."""
-        return self.elder_pledge_buy
+        return self.elder_pledge_flag
 
     def purchase_building(self, count: int = 1, bulk: bool = False):
         """Purchase most efficient affordable building, up to a maximum of 'count'. Default 1."""
@@ -502,18 +505,26 @@ class Clicker:
 
         # Continue until requested to stop.
         while self.clicking_event.is_set():
-            # Check if we have reached the auto purchase interval.
-            if time.time() >= auto_purchase:
-                # Purchase all available buildings and upgrades.
-                self.auto_purchase()
+            # Check if auto purchase is enabled.
+            if self.auto_purchase_flag:
+                # Check if we have reached the auto purchase interval.
+                if time.time() >= auto_purchase:
+                    # Purchase all available buildings and upgrades.
+                    self.auto_purchase()
 
-                # Set next auto purchase interval.
-                auto_purchase = time.time() + PURCHASE_AUTO_MINUTES * 60
+                    # Set next auto purchase interval.
+                    auto_purchase = time.time() + PURCHASE_AUTO_MINUTES * 60
 
             # Throttle the next auto save check.
             time.sleep(THREAD_DELAY)
 
-    # TODO toggle auto purchase
+    def toggle_auto_purchase(self):
+        """Toggle the upgrade / building automatic purchase status."""
+        self.auto_purchase_flag = not self.auto_purchase_flag
+
+    def get_auto_purchase_status(self) -> bool:
+        """Return the upgrade / building automatic purchase status."""
+        return self.auto_purchase_flag
 
     def auto_purchase(self):
         """Automatically purchase all available upgrades and buildings."""

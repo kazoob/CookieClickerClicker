@@ -41,15 +41,24 @@ while menu_input != "q" and menu_input != "x":
         # Elder Pledge is currently disabled, menu to enable
         elder_pledge_string = "Enable"
 
+    # Display correct enable / disable auto purchase string
+    if clicker.get_auto_purchase_status():
+        # Auto purchase is currently enabled, menu to disable
+        auto_purchase_string = "Disable"
+    else:
+        # Auto purchase is currently disabled, menu to enable
+        auto_purchase_string = "Enable"
+
     print("Menu: ")
     print(f"c     = {clicking_string} cookie / golden cookie / wrath clicking")
     print(f"e     = {elder_pledge_string} Elder Pledge purchase")
+    print(f"d     = {auto_purchase_string} auto purchase")
+    print("a     = Purchase all available upgrades and buildings")
     print("p     = Purchase best building")
     print("p #   = Purchase best # buildings (individually)")
     print("p # b = Purchase best # buildings (bulk)")
     print("u     = Purchase next upgrade")
     print("u #   = Purchase next # upgrades")
-    print("a     = Purchase all available upgrades and buildings")
     print("s     = Save game to file")
     print("q     = Quit (save)")
     print("x     = Quit (do not save)")
@@ -67,9 +76,12 @@ while menu_input != "q" and menu_input != "x":
     # Start / stop Elder Pledge purchase.
     elif menu_input.startswith("e"):
         clicker.toggle_elder_pledge()
-    # Save game data to file.
-    elif menu_input.startswith("s"):
-        clicker.save_file()
+    # Start / stop auto purchase.
+    elif menu_input.startswith("d"):
+        clicker.toggle_auto_purchase()
+    # Purchase all available upgrades and buildings.
+    elif menu_input.startswith("a"):
+        clicker.auto_purchase()
     # Purchase best building.
     elif menu_input.startswith("p"):
         # Determine if bulk purchasing is requested.
@@ -80,9 +92,9 @@ while menu_input != "q" and menu_input != "x":
     elif menu_input.startswith("u"):
         # Purchase requested number of upgrades (maximum).
         clicker.purchase_upgrade(get_count(menu_input))
-    # Purchase all available upgrades and buildings.
-    elif menu_input.startswith("a"):
-        clicker.auto_purchase()
+    # Save game data to file.
+    elif menu_input.startswith("s"):
+        clicker.save_file()
     # Quit and save data.
     elif menu_input.startswith("q"):
         clicker.quit(save=True)
