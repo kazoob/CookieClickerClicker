@@ -245,6 +245,14 @@ class Clicker:
             # Throttle the next wrinkler check.
             time.sleep(THREAD_DELAY)
 
+    def toggle_elder_pledge(self):
+        """Toggle the elder pledge automatic purchase status."""
+        self.elder_pledge_flag = not self.elder_pledge_flag
+
+    def get_elder_pledge_status(self) -> bool:
+        """Return the elder pledge automatic purchase status."""
+        return self.elder_pledge_flag
+
     def _elder_pledge(self):
         """Periodically check if the elder pledge is unlocked, and elder pledge remaining time has run out.
         If so, automatically purchase a new elder pledge."""
@@ -272,13 +280,69 @@ class Clicker:
             # Throttle the next elder pledge check.
             time.sleep(THREAD_DELAY)
 
-    def toggle_elder_pledge(self):
-        """Toggle the elder pledge automatic purchase status."""
-        self.elder_pledge_flag = not self.elder_pledge_flag
+    def _auto_save(self):
+        """Automatically save the game at defined interval."""
+        # Set next auto save interval.
+        auto_save_next = time.time() + SAVE_DATA_AUTO_HOURS * 3600
 
-    def get_elder_pledge_status(self) -> bool:
-        """Return the elder pledge automatic purchase status."""
-        return self.elder_pledge_flag
+        # Continue until requested to stop.
+        while self.clicking_event.is_set():
+            # Check if we have reached the auto save interval.
+            if time.time() >= auto_save_next:
+                # Save the game.
+                self.save_file()
+
+                # Set next auto save interval.
+                auto_save_next = time.time() + SAVE_DATA_AUTO_HOURS * 3600
+
+            # Throttle the next auto save check.
+            time.sleep(THREAD_DELAY)
+
+    def toggle_auto_purchase(self):
+        """Toggle the upgrade / building automatic purchase status."""
+        self.auto_purchase_flag = not self.auto_purchase_flag
+
+    def get_auto_purchase_status(self) -> bool:
+        """Return the upgrade / building automatic purchase status."""
+        return self.auto_purchase_flag
+
+    def _auto_purchase_thread(self):
+        """Automatically purchase all available upgrades and buildings at defined intervals."""
+        # Set next auto purchase interval.
+        auto_purchase = time.time() + PURCHASE_AUTO_MINUTES * 60
+
+        # Continue until requested to stop.
+        while self.clicking_event.is_set():
+            # Check if auto purchase is enabled.
+            if self.auto_purchase_flag:
+                # Check if we have reached the auto purchase interval.
+                if time.time() >= auto_purchase:
+                    # Purchase all available buildings and upgrades.
+                    self.auto_purchase()
+
+                    # Set next auto purchase interval.
+                    auto_purchase = time.time() + PURCHASE_AUTO_MINUTES * 60
+
+            # Throttle the next auto save check.
+            time.sleep(THREAD_DELAY)
+
+    def _fortune_thread(self):
+        """Periodically check for and click on any fortunes found in the news."""
+        # Continue until requested to stop.
+        while self.clicking_event.is_set():
+            # https://www.reddit.com/r/CookieClicker/comments/gklzyv/is_there_any_script_for_clicking_the_fortune_in/
+            try:
+                self.driver.execute_script(
+                    'if (Game.TickerEffect && Game.TickerEffect.type == "fortune")'
+                    '{'
+                    '   Game.tickerL.click();'
+                    '}'
+                )
+            except JavascriptException:
+                pass
+
+            # Throttle the next fortune check.
+            time.sleep(FORTUNE_THREAD_DELAY)
 
     def purchase_building(self, count: int = 1, bulk: bool = False):
         """Purchase most efficient affordable building, up to a maximum of 'count'. Default 1."""
@@ -454,81 +518,6 @@ class Clicker:
 
         self.driver.execute_script(f'Game.storeBuyAll();')
 
-    def save_file(self):
-        """Export save data to file."""
-        # Get save data.
-        save_data = self.driver.execute_script('return Game.WriteSave(1);')
-
-        if save_data:
-            # Check if existing save file is present.
-            if os.path.isfile(SAVE_DATA_FILENAME):
-                # Rename existing save file, append current date time.
-                timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
-                backup_file_name = f"{SAVE_DATA_FILENAME.replace(".", f"_{timestamp}.")}"
-                os.rename(src=SAVE_DATA_FILENAME, dst=backup_file_name)
-
-            # Get list of backup save files, sorted oldest to newest.
-            save_backup_files = sorted(glob.glob(SAVE_DATA_FILENAME.replace(".", "_*.")))
-
-            # Check if backup save file count exceeds max count.
-            if len(save_backup_files) > SAVE_DATA_BACKUP_COUNT:
-                # Delete oldest files.
-                for i in range(0, len(save_backup_files) - SAVE_DATA_BACKUP_COUNT):
-                    try:
-                        os.remove(save_backup_files[i])
-                    except FileNotFoundError:
-                        print(f"Unable to delete old save file: {save_backup_files[i]}")
-
-            # Export save data to text file.
-            with open(file=SAVE_DATA_FILENAME, mode="w") as save_file:
-                save_file.write(save_data)
-
-    def _auto_save(self):
-        """Automatically save the game at defined interval."""
-        # Set next auto save interval.
-        auto_save_next = time.time() + SAVE_DATA_AUTO_HOURS * 3600
-
-        # Continue until requested to stop.
-        while self.clicking_event.is_set():
-            # Check if we have reached the auto save interval.
-            if time.time() >= auto_save_next:
-                # Save the game.
-                self.save_file()
-
-                # Set next auto save interval.
-                auto_save_next = time.time() + SAVE_DATA_AUTO_HOURS * 3600
-
-            # Throttle the next auto save check.
-            time.sleep(THREAD_DELAY)
-
-    def _auto_purchase_thread(self):
-        """Automatically purchase all available upgrades and buildings at defined intervals."""
-        # Set next auto purchase interval.
-        auto_purchase = time.time() + PURCHASE_AUTO_MINUTES * 60
-
-        # Continue until requested to stop.
-        while self.clicking_event.is_set():
-            # Check if auto purchase is enabled.
-            if self.auto_purchase_flag:
-                # Check if we have reached the auto purchase interval.
-                if time.time() >= auto_purchase:
-                    # Purchase all available buildings and upgrades.
-                    self.auto_purchase()
-
-                    # Set next auto purchase interval.
-                    auto_purchase = time.time() + PURCHASE_AUTO_MINUTES * 60
-
-            # Throttle the next auto save check.
-            time.sleep(THREAD_DELAY)
-
-    def toggle_auto_purchase(self):
-        """Toggle the upgrade / building automatic purchase status."""
-        self.auto_purchase_flag = not self.auto_purchase_flag
-
-    def get_auto_purchase_status(self) -> bool:
-        """Return the upgrade / building automatic purchase status."""
-        return self.auto_purchase_flag
-
     def auto_purchase(self):
         """Automatically purchase all available upgrades and buildings."""
         # Purchase all available upgrades.
@@ -564,6 +553,35 @@ class Clicker:
         while self._purchase_next_upgrade():
             pass
 
+    def save_file(self):
+        """Export save data to file."""
+        # Get save data.
+        save_data = self.driver.execute_script('return Game.WriteSave(1);')
+
+        if save_data:
+            # Check if existing save file is present.
+            if os.path.isfile(SAVE_DATA_FILENAME):
+                # Rename existing save file, append current date time.
+                timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+                backup_file_name = f"{SAVE_DATA_FILENAME.replace(".", f"_{timestamp}.")}"
+                os.rename(src=SAVE_DATA_FILENAME, dst=backup_file_name)
+
+            # Get list of backup save files, sorted oldest to newest.
+            save_backup_files = sorted(glob.glob(SAVE_DATA_FILENAME.replace(".", "_*.")))
+
+            # Check if backup save file count exceeds max count.
+            if len(save_backup_files) > SAVE_DATA_BACKUP_COUNT:
+                # Delete oldest files.
+                for i in range(0, len(save_backup_files) - SAVE_DATA_BACKUP_COUNT):
+                    try:
+                        os.remove(save_backup_files[i])
+                    except FileNotFoundError:
+                        print(f"Unable to delete old save file: {save_backup_files[i]}")
+
+            # Export save data to text file.
+            with open(file=SAVE_DATA_FILENAME, mode="w") as save_file:
+                save_file.write(save_data)
+
     def quit(self, save: bool = True):
         """Save the game data to file. Quit the game."""
         # Stop clicking threads.
@@ -579,23 +597,5 @@ class Clicker:
 
         # Quit browser.
         self.driver.quit()
-
-    def _fortune_thread(self):
-        """Periodically check for and click on any fortunes found in the news."""
-        # Continue until requested to stop.
-        while self.clicking_event.is_set():
-            # https://www.reddit.com/r/CookieClicker/comments/gklzyv/is_there_any_script_for_clicking_the_fortune_in/
-            try:
-                self.driver.execute_script(
-                    'if (Game.TickerEffect && Game.TickerEffect.type == "fortune")'
-                    '{'
-                    '   Game.tickerL.click();'
-                    '}'
-                )
-            except JavascriptException:
-                pass
-
-            # Throttle the next fortune check.
-            time.sleep(FORTUNE_THREAD_DELAY)
 
 # Tips https://gist.github.com/ob-ivan/6800011
