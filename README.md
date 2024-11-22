@@ -42,3 +42,7 @@ If cookie clicking is enabled, the following tasks are performed:
  6. Elder Pledge purchase **every 5 seconds** (if also enabled).
  7. Upgrades and buildings purchase **every 15 minutes** (if also enabled).
  8. Save the game to file **every 6 hours**.
+
+## Known Issues
+
+ 1. When the auto upgrades and buildings purchase routine runs, the menu will no longer be displayed in the console. Simply press 'Enter' to restore the menu.
