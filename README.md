@@ -6,8 +6,9 @@ https://orteil.dashnet.org/cookieclicker/
 
 ## Prerequisites:
 
-1. Python3
-2. Selenium module `pip install selenium`
+1. Chrome
+2. Python3
+3. Selenium module `pip install selenium`
 
 ## Run:
 
