@@ -31,7 +31,13 @@ https://orteil.dashnet.org/cookieclicker/
 
 ## Functionality
 
-If cookie clicking is enabled, the following tasks are performed:
+When the application starts:
+1. Cookie clicking will be disabled for a new game (_can be **enabled** via menu_).
+2. If an existing save data was found, it will be loaded and cookie clicking enabled (_can be **disabled** via menu_).
+3. Elder Pledge will be purchased automatically (_can be **disabled** via menu_).
+4. Upgrades and buildings will be purchased automatically at set intervals (_can be **disabled** via menu_).
+
+When cookie clicking is enabled, the following tasks are performed:
 
 1. Big cookie clicking **as fast as possible**.
 2. Golden cookie clicking **as fast as possible**.
