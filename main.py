@@ -50,7 +50,7 @@ while menu_input != "q" and menu_input != "x":
         auto_purchase_string = "Enable"
 
     print("Menu: ")
-    print(f"c     = {clicking_string} cookie / golden cookie / wrath clicking")
+    print(f"c     = {clicking_string} big cookie / golden cookie / special cookie clicking")
     print(f"e     = {elder_pledge_string} Elder Pledge purchase")
     print(f"d     = {auto_purchase_string} auto purchase")
     print("a     = Purchase all available upgrades and buildings")
