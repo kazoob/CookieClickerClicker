@@ -37,7 +37,7 @@ If cookie clicking is enabled, the following tasks are performed:
  1. Big cookie clicking **as fast as possible**.
  2. Golden cookie clicking **as fast as possible**.
  3. Special cookie (wrath, reindeer, etc.) clicking **as fast as possible**.
- 4. Wrinkler popping **when they attach** to the big cookie.
+ 4. Wrinkler popping (**when they attach**) to the big cookie **every 5 seconds**.
  5. Fortune check and click **every 3 seconds**.
  6. Elder Pledge purchase **every 5 seconds** (if also enabled).
  7. Upgrades and buildings purchase **every 15 minutes** (if also enabled).
